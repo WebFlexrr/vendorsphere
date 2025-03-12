@@ -1,16 +1,51 @@
 
-import React, { useState } from 'react';
-import { Menu, X, LayoutDashboard, Package, Users, ShoppingCart, Settings, LogOut, ChevronRight, BarChart, Megaphone } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  Menu, X, LayoutDashboard, Package, Users, ShoppingCart, 
+  Settings, LogOut, ChevronRight, BarChart, Megaphone, 
+  FileText 
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useLocation, Link } from 'react-router-dom';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Close sidebar by default on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  // Close sidebar when navigating on mobile
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -50,18 +85,67 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <aside 
           className={cn(
             "bg-white fixed md:static h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] shadow-md transition-all duration-300 z-10",
-            sidebarOpen ? "w-64" : "w-0 md:w-16 overflow-hidden"
+            sidebarOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 md:w-16 overflow-hidden"
           )}
         >
           <div className="p-3 md:p-4">
             <nav className="space-y-1">
-              <SidebarItem icon={LayoutDashboard} label="Dashboard" active href="/admin" collapsed={!sidebarOpen} />
-              <SidebarItem icon={Package} label="Products" href="/admin/products" collapsed={!sidebarOpen} />
-              <SidebarItem icon={Users} label="Vendors" href="/admin/vendors" collapsed={!sidebarOpen} />
-              <SidebarItem icon={ShoppingCart} label="Orders" href="/admin/orders" collapsed={!sidebarOpen} />
-              <SidebarItem icon={BarChart} label="Analytics" href="/admin/analytics" collapsed={!sidebarOpen} />
-              <SidebarItem icon={Megaphone} label="Marketing" href="/admin/marketing" collapsed={!sidebarOpen} />
-              <SidebarItem icon={Settings} label="Settings" href="/admin/settings" collapsed={!sidebarOpen} />
+              <SidebarItem 
+                icon={LayoutDashboard} 
+                label="Dashboard" 
+                active={location.pathname === '/admin'} 
+                href="/admin" 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Package} 
+                label="Products" 
+                href="/admin/products" 
+                active={location.pathname === '/admin/products'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Users} 
+                label="Vendors" 
+                href="/admin/vendors" 
+                active={location.pathname === '/admin/vendors'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={ShoppingCart} 
+                label="Orders" 
+                href="/admin/orders" 
+                active={location.pathname === '/admin/orders'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={BarChart} 
+                label="Analytics" 
+                href="/admin/analytics" 
+                active={location.pathname === '/admin/analytics'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Megaphone} 
+                label="Marketing" 
+                href="/admin/marketing" 
+                active={location.pathname === '/admin/marketing'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={FileText} 
+                label="Blog" 
+                href="/admin/blog" 
+                active={location.pathname === '/admin/blog'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Settings} 
+                label="Settings" 
+                href="/admin/settings" 
+                active={location.pathname === '/admin/settings'} 
+                collapsed={!sidebarOpen} 
+              />
             </nav>
 
             <Separator className="my-3 md:my-4" />
@@ -70,15 +154,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </div>
         </aside>
 
-        {/* Main content */}
-        <main className={cn(
-          "flex-1 p-4 md:p-6 transition-all duration-300 overflow-auto", 
-          sidebarOpen ? "md:ml-0" : "md:ml-0",
-          sidebarOpen && "ml-64 md:ml-0",
-          !sidebarOpen && "ml-0"
-        )}>
-          {children}
-        </main>
+        {/* Main content - add overlay for mobile */}
+        <div className="relative flex-1">
+          {/* Mobile overlay */}
+          {sidebarOpen && (
+            <div 
+              className="fixed inset-0 bg-black/20 z-0 md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            ></div>
+          )}
+          
+          <main className="p-4 md:p-6 overflow-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
@@ -100,8 +189,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   collapsed = false 
 }) => {
   return (
-    <a 
-      href={href} 
+    <Link 
+      to={href} 
       className={cn(
         "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
         active 
@@ -112,7 +201,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       <Icon className="h-5 w-5 flex-shrink-0" />
       {!collapsed && <span className="ml-2">{label}</span>}
       {active && !collapsed && <ChevronRight className="ml-auto h-4 w-4" />}
-    </a>
+    </Link>
   );
 };
 
