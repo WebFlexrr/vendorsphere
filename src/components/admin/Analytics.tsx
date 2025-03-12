@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -21,12 +20,12 @@ import MetricsOverview from './analytics/MetricsOverview';
 import OverviewCharts from './analytics/OverviewCharts';
 
 const Analytics = () => {
-  // Mock analytics data
+  // Mock analytics data - fixed the trend type to use the union type 'up' | 'down'
   const periodMetrics = [
-    { title: 'Total Revenue', value: '$24,345', change: '+12.5%', trend: 'up', icon: DollarSign, color: 'bg-vsphere-primary/10', iconColor: 'text-vsphere-primary' },
-    { title: 'Orders', value: '342', change: '+8.2%', trend: 'up', icon: ShoppingCart, color: 'bg-vsphere-secondary/10', iconColor: 'text-vsphere-secondary' },
-    { title: 'Customers', value: '2,451', change: '+15.3%', trend: 'up', icon: Users, color: 'bg-vsphere-mint/20', iconColor: 'text-vsphere-dark' },
-    { title: 'Conversion Rate', value: '3.6%', change: '-0.8%', trend: 'down', icon: TrendingUp, color: 'bg-vsphere-accent/10', iconColor: 'text-vsphere-dark' },
+    { title: 'Total Revenue', value: '$24,345', change: '+12.5%', trend: 'up' as const, icon: DollarSign, color: 'bg-vsphere-primary/10', iconColor: 'text-vsphere-primary' },
+    { title: 'Orders', value: '342', change: '+8.2%', trend: 'up' as const, icon: ShoppingCart, color: 'bg-vsphere-secondary/10', iconColor: 'text-vsphere-secondary' },
+    { title: 'Customers', value: '2,451', change: '+15.3%', trend: 'up' as const, icon: Users, color: 'bg-vsphere-mint/20', iconColor: 'text-vsphere-dark' },
+    { title: 'Conversion Rate', value: '3.6%', change: '-0.8%', trend: 'down' as const, icon: TrendingUp, color: 'bg-vsphere-accent/10', iconColor: 'text-vsphere-dark' },
   ];
 
   // Mock top products
