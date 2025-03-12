@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -47,12 +48,13 @@ const Analytics = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4">
+        <h1 className="text-xl md:text-2xl font-bold">Analytics Dashboard</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" /> Export Report
+          <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs md:text-sm">
+            <Download className="h-3 w-3 md:h-4 md:w-4" /> 
+            <span className="hidden xs:inline">Export Report</span>
           </Button>
         </div>
       </div>
@@ -60,11 +62,11 @@ const Analytics = () => {
       {/* Time Period Selector */}
       <div className="flex justify-between items-center">
         <Tabs defaultValue="30days" className="w-full">
-          <TabsList className="grid w-full sm:w-[400px] grid-cols-4">
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
-            <TabsTrigger value="quarter">Quarter</TabsTrigger>
-            <TabsTrigger value="year">Year</TabsTrigger>
+          <TabsList className="grid w-full max-w-full sm:max-w-[400px] grid-cols-4">
+            <TabsTrigger value="7days" className="text-xs md:text-sm">7 Days</TabsTrigger>
+            <TabsTrigger value="30days" className="text-xs md:text-sm">30 Days</TabsTrigger>
+            <TabsTrigger value="quarter" className="text-xs md:text-sm">Quarter</TabsTrigger>
+            <TabsTrigger value="year" className="text-xs md:text-sm">Year</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -73,27 +75,27 @@ const Analytics = () => {
       <MetricsOverview metrics={periodMetrics} />
 
       {/* Main Analytics Tabs */}
-      <Tabs defaultValue="overview" className="mt-6">
-        <TabsList className="w-full max-w-[600px]">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="productFrequency">Product Frequency</TabsTrigger>
-          <TabsTrigger value="retention">Customer Retention</TabsTrigger>
-          <TabsTrigger value="pageViews">Page Views</TabsTrigger>
+      <Tabs defaultValue="overview" className="mt-4 md:mt-6">
+        <TabsList className="w-full max-w-full md:max-w-[600px] overflow-x-auto flex whitespace-nowrap">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="productFrequency" className="text-xs md:text-sm">Product Frequency</TabsTrigger>
+          <TabsTrigger value="retention" className="text-xs md:text-sm">Customer Retention</TabsTrigger>
+          <TabsTrigger value="pageViews" className="text-xs md:text-sm">Page Views</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="mt-6">
+        <TabsContent value="overview" className="mt-4 md:mt-6">
           <OverviewCharts topProducts={topProducts} trafficSources={trafficSources} />
         </TabsContent>
         
-        <TabsContent value="productFrequency" className="mt-6">
+        <TabsContent value="productFrequency" className="mt-4 md:mt-6">
           <ProductFrequencyTab />
         </TabsContent>
         
-        <TabsContent value="retention" className="mt-6">
+        <TabsContent value="retention" className="mt-4 md:mt-6">
           <RetentionTab />
         </TabsContent>
         
-        <TabsContent value="pageViews" className="mt-6">
+        <TabsContent value="pageViews" className="mt-4 md:mt-6">
           <PageViewsTab />
         </TabsContent>
       </Tabs>

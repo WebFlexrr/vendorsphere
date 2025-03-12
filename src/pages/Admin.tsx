@@ -11,16 +11,18 @@ import Marketing from '@/components/admin/Marketing';
 
 const Admin = () => {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/products" element={<ProductManagement />} />
-        <Route path="/orders" element={<OrderManagement />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/vendors" element={<VendorManagement />} />
-        <Route path="/marketing" element={<Marketing />} />
-      </Routes>
-    </AdminLayout>
+    <div className="w-full">
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/products" element={<ProductManagement />} />
+          <Route path="/orders" element={<OrderManagement />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/vendors" element={<VendorManagement />} />
+          <Route path="/marketing" element={<Marketing />} />
+        </Routes>
+      </AdminLayout>
+    </div>
   );
 };
 

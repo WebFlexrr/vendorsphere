@@ -36,11 +36,11 @@ export const MetricCard: React.FC<{
 }) => {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="pt-4 md:pt-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <h3 className="text-2xl font-bold mt-1">{value}</h3>
+            <p className="text-xs md:text-sm font-medium text-gray-500">{title}</p>
+            <h3 className="text-lg md:text-2xl font-bold mt-1">{value}</h3>
             <div className="flex items-center mt-1">
               <span className={`text-xs font-medium ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
                 {change}
@@ -53,7 +53,7 @@ export const MetricCard: React.FC<{
             </div>
           </div>
           <div className={`${color} p-2 rounded-md`}>
-            <Icon className={`h-5 w-5 ${iconColor}`} />
+            <Icon className={`h-4 w-4 md:h-5 md:w-5 ${iconColor}`} />
           </div>
         </div>
       </CardContent>
@@ -63,7 +63,7 @@ export const MetricCard: React.FC<{
 
 const MetricsOverview: React.FC<MetricsOverviewProps> = ({ metrics }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
       {metrics.map((metric, index) => (
         <MetricCard 
           key={index}
