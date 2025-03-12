@@ -15,9 +15,15 @@ import {
   Package,
   ArrowUpRight,
   ArrowDownRight,
-  Download
+  Download,
+  Eye,
+  RefreshCw,
+  ShoppingBag
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import ProductFrequencyTab from './analytics/ProductFrequencyTab';
+import RetentionTab from './analytics/RetentionTab';
+import PageViewsTab from './analytics/PageViewsTab';
 
 const Analytics = () => {
   // Mock analytics data
@@ -85,105 +91,129 @@ const Analytics = () => {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Revenue Trends</span>
-              <Badge variant="outline" className="bg-vsphere-light/50">
-                Last 30 days
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 rounded-md">
-              <div className="flex flex-col items-center text-gray-400">
-                <LineChart className="h-12 w-12 mb-2" />
-                <p>Revenue trend chart visualization</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Sales by Category</span>
-              <Badge variant="outline" className="bg-vsphere-light/50">
-                Last 30 days
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 rounded-md">
-              <div className="flex flex-col items-center text-gray-400">
-                <PieChart className="h-12 w-12 mb-2" />
-                <p>Category distribution chart visualization</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Additional Analysis Sections */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {topProducts.map((product, index) => (
-                <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                  <div className="flex items-start gap-3">
-                    <div className={`h-8 w-8 rounded-full flex items-center justify-center bg-vsphere-${index % 2 === 0 ? 'primary' : 'secondary'}/10 text-vsphere-${index % 2 === 0 ? 'primary' : 'secondary'}`}>
-                      <Package className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-500">{product.category}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">${product.revenue.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500">{product.sales} units</p>
+      {/* Main Analytics Tabs */}
+      <Tabs defaultValue="overview" className="mt-6">
+        <TabsList className="w-full max-w-[600px]">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="productFrequency">Product Frequency</TabsTrigger>
+          <TabsTrigger value="retention">Customer Retention</TabsTrigger>
+          <TabsTrigger value="pageViews">Page Views</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="mt-6">
+          {/* Charts Section */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Revenue Trends</span>
+                  <Badge variant="outline" className="bg-vsphere-light/50">
+                    Last 30 days
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 rounded-md">
+                  <div className="flex flex-col items-center text-gray-400">
+                    <LineChart className="h-12 w-12 mb-2" />
+                    <p>Revenue trend chart visualization</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Traffic Sources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {trafficSources.map((source, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>{source.source}</span>
-                    <span className="font-medium">{source.visitors.toLocaleString()} visitors</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        index === 0 ? 'bg-vsphere-primary' :
-                        index === 1 ? 'bg-vsphere-secondary' :
-                        index === 2 ? 'bg-vsphere-accent' :
-                        index === 3 ? 'bg-vsphere-mint' : 'bg-vsphere-skyblue'
-                      }`}
-                      style={{ width: `${source.percentage}%` }}
-                    ></div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Sales by Category</span>
+                  <Badge variant="outline" className="bg-vsphere-light/50">
+                    Last 30 days
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 rounded-md">
+                  <div className="flex flex-col items-center text-gray-400">
+                    <PieChart className="h-12 w-12 mb-2" />
+                    <p>Category distribution chart visualization</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Additional Analysis Sections */}
+          <div className="grid gap-6 md:grid-cols-2 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Selling Products</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {topProducts.map((product, index) => (
+                    <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                      <div className="flex items-start gap-3">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center bg-vsphere-${index % 2 === 0 ? 'primary' : 'secondary'}/10 text-vsphere-${index % 2 === 0 ? 'primary' : 'secondary'}`}>
+                          <Package className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{product.name}</p>
+                          <p className="text-sm text-gray-500">{product.category}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">${product.revenue.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">{product.sales} units</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Traffic Sources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {trafficSources.map((source, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{source.source}</span>
+                        <span className="font-medium">{source.visitors.toLocaleString()} visitors</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            index === 0 ? 'bg-vsphere-primary' :
+                            index === 1 ? 'bg-vsphere-secondary' :
+                            index === 2 ? 'bg-vsphere-accent' :
+                            index === 3 ? 'bg-vsphere-mint' : 'bg-vsphere-skyblue'
+                          }`}
+                          style={{ width: `${source.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="productFrequency" className="mt-6">
+          <ProductFrequencyTab />
+        </TabsContent>
+        
+        <TabsContent value="retention" className="mt-6">
+          <RetentionTab />
+        </TabsContent>
+        
+        <TabsContent value="pageViews" className="mt-6">
+          <PageViewsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

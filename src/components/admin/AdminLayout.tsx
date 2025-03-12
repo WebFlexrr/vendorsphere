@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Menu, X, LayoutDashboard, Package, Users, ShoppingCart, Settings, LogOut, ChevronRight } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Package, Users, ShoppingCart, Settings, LogOut, ChevronRight, BarChart, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -59,6 +59,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <SidebarItem icon={Package} label="Products" href="/admin/products" collapsed={!sidebarOpen} />
               <SidebarItem icon={Users} label="Vendors" href="/admin/vendors" collapsed={!sidebarOpen} />
               <SidebarItem icon={ShoppingCart} label="Orders" href="/admin/orders" collapsed={!sidebarOpen} />
+              <SidebarItem icon={BarChart} label="Analytics" href="/admin/analytics" collapsed={!sidebarOpen} />
+              <SidebarItem icon={Megaphone} label="Marketing" href="/admin/marketing" collapsed={!sidebarOpen} />
               <SidebarItem icon={Settings} label="Settings" href="/admin/settings" collapsed={!sidebarOpen} />
             </nav>
 
