@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import UserProfileDropdown from './UserProfileDropdown';
 
 const Hero = () => {
   return (
@@ -29,6 +30,10 @@ const Hero = () => {
       </div>
       
       <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="absolute top-4 right-4 z-10">
+          <UserProfileDropdown />
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="text-center md:text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-vsphere-dark mb-4">
