@@ -10,6 +10,8 @@ import VendorManagement from '@/components/admin/VendorManagement';
 import Marketing from '@/components/admin/Marketing';
 import Settings from '@/components/admin/Settings';
 import BlogManagement from '@/components/admin/BlogManagement';
+import EmployeeManagement from '@/components/admin/EmployeeManagement';
+import InventoryManagement from '@/components/admin/InventoryManagement';
 
 const Admin = () => {
   return (
@@ -24,6 +26,8 @@ const Admin = () => {
           <Route path="/marketing" element={<Marketing />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/blog" element={<BlogManagement />} />
+          <Route path="/employees" element={<EmployeeManagement />} />
+          <Route path="/inventory" element={<InventoryManagement />} />
         </Routes>
       </AdminLayout>
     </div>
