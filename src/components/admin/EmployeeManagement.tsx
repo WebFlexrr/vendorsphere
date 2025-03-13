@@ -1,203 +1,248 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { User, Plus, Search, Edit, Trash2, Shield, Download, Users, Mail, UserPlus, Key } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Users, UserCircle, Shield, Plus, Download, Pencil, Trash2, Mail, 
+  Phone, Search, CheckCircle, XCircle, ShieldCheck, ShieldAlert, LucideIcon
+} from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
-interface Employee {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  status: 'active' | 'inactive';
-  permissions: string[];
-  lastActive: string;
-}
-
-interface Permission {
+type Permission = {
   id: string;
   name: string;
   description: string;
-  module: string;
-}
+  category: 'products' | 'vendors' | 'orders' | 'analytics' | 'marketing' | 'blog' | 'settings';
+};
 
-const mockEmployees: Employee[] = [
+type Role = {
+  id: number;
+  name: string;
+  description: string;
+  permissions: string[];
+  employeeCount: number;
+};
+
+type Employee = {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  status: 'active' | 'inactive';
+  avatar?: string;
+  joinDate: string;
+  lastActive?: string;
+  notes?: string;
+};
+
+// Sample permissions data
+const permissions: Permission[] = [
+  { id: 'products_view', name: 'View Products', description: 'Can view product listings', category: 'products' },
+  { id: 'products_create', name: 'Create Products', description: 'Can create new products', category: 'products' },
+  { id: 'products_edit', name: 'Edit Products', description: 'Can edit existing products', category: 'products' },
+  { id: 'products_delete', name: 'Delete Products', description: 'Can delete products', category: 'products' },
+  
+  { id: 'vendors_view', name: 'View Vendors', description: 'Can view vendor profiles', category: 'vendors' },
+  { id: 'vendors_create', name: 'Create Vendors', description: 'Can create new vendor profiles', category: 'vendors' },
+  { id: 'vendors_edit', name: 'Edit Vendors', description: 'Can edit vendor profiles', category: 'vendors' },
+  { id: 'vendors_approve', name: 'Approve Vendors', description: 'Can approve vendor applications', category: 'vendors' },
+  
+  { id: 'orders_view', name: 'View Orders', description: 'Can view customer orders', category: 'orders' },
+  { id: 'orders_manage', name: 'Manage Orders', description: 'Can manage order status and processing', category: 'orders' },
+  { id: 'orders_refund', name: 'Process Refunds', description: 'Can process order refunds', category: 'orders' },
+  
+  { id: 'analytics_view', name: 'View Analytics', description: 'Can view analytics data', category: 'analytics' },
+  { id: 'analytics_export', name: 'Export Analytics', description: 'Can export analytics reports', category: 'analytics' },
+  
+  { id: 'marketing_campaigns', name: 'Manage Campaigns', description: 'Can create and manage marketing campaigns', category: 'marketing' },
+  { id: 'marketing_promos', name: 'Manage Promotions', description: 'Can create and manage promotional offers', category: 'marketing' },
+  
+  { id: 'blog_view', name: 'View Blog Posts', description: 'Can view blog content', category: 'blog' },
+  { id: 'blog_create', name: 'Create Blog Posts', description: 'Can create new blog posts', category: 'blog' },
+  { id: 'blog_edit', name: 'Edit Blog Posts', description: 'Can edit existing blog posts', category: 'blog' },
+  { id: 'blog_publish', name: 'Publish Blog Posts', description: 'Can publish or unpublish blog posts', category: 'blog' },
+  
+  { id: 'settings_view', name: 'View Settings', description: 'Can view system settings', category: 'settings' },
+  { id: 'settings_edit', name: 'Edit Settings', description: 'Can modify system settings', category: 'settings' },
+  { id: 'settings_roles', name: 'Manage Roles', description: 'Can create and manage role permissions', category: 'settings' },
+];
+
+// Sample roles data
+const initialRoles: Role[] = [
   {
     id: 1,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    role: 'Admin',
-    department: 'Management',
-    status: 'active',
-    permissions: ['all_access'],
-    lastActive: '2023-05-15T13:45:00'
+    name: 'Administrator',
+    description: 'Full access to all system features',
+    permissions: permissions.map(p => p.id),
+    employeeCount: 2
   },
   {
     id: 2,
-    name: 'Jane Smith',
-    email: 'jane.smith@example.com',
-    role: 'Manager',
-    department: 'Sales',
-    status: 'active',
-    permissions: ['products_read', 'products_write', 'orders_read', 'analytics_read'],
-    lastActive: '2023-05-16T10:30:00'
+    name: 'Product Manager',
+    description: 'Manages product catalog and inventory',
+    permissions: [
+      'products_view', 'products_create', 'products_edit', 'products_delete',
+      'analytics_view'
+    ],
+    employeeCount: 3
   },
   {
     id: 3,
-    name: 'Robert Johnson',
-    email: 'robert.johnson@example.com',
-    role: 'Editor',
-    department: 'Content',
-    status: 'active',
-    permissions: ['blog_read', 'blog_write', 'marketing_read'],
-    lastActive: '2023-05-14T15:20:00'
+    name: 'Vendor Manager',
+    description: 'Manages vendor relationships and onboarding',
+    permissions: [
+      'vendors_view', 'vendors_create', 'vendors_edit', 'vendors_approve',
+      'analytics_view'
+    ],
+    employeeCount: 2
   },
   {
     id: 4,
-    name: 'Emily Brown',
-    email: 'emily.brown@example.com',
-    role: 'Staff',
-    department: 'Support',
-    status: 'inactive',
-    permissions: ['orders_read', 'customers_read'],
-    lastActive: '2023-04-28T09:15:00'
+    name: 'Order Processor',
+    description: 'Handles order processing and customer service',
+    permissions: [
+      'orders_view', 'orders_manage',
+      'products_view'
+    ],
+    employeeCount: 4
+  },
+  {
+    id: 5,
+    name: 'Marketing Specialist',
+    description: 'Manages marketing campaigns and blog content',
+    permissions: [
+      'marketing_campaigns', 'marketing_promos',
+      'blog_view', 'blog_create', 'blog_edit', 'blog_publish',
+      'products_view', 'analytics_view'
+    ],
+    employeeCount: 2
   }
 ];
 
-const availablePermissions: Permission[] = [
-  { id: 'products_read', name: 'View Products', description: 'Can view product listings', module: 'Products' },
-  { id: 'products_write', name: 'Manage Products', description: 'Can create, edit and delete products', module: 'Products' },
-  { id: 'orders_read', name: 'View Orders', description: 'Can view customer orders', module: 'Orders' },
-  { id: 'orders_write', name: 'Manage Orders', description: 'Can process and update orders', module: 'Orders' },
-  { id: 'customers_read', name: 'View Customers', description: 'Can view customer information', module: 'Customers' },
-  { id: 'customers_write', name: 'Manage Customers', description: 'Can edit customer information', module: 'Customers' },
-  { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and reports', module: 'Analytics' },
-  { id: 'blog_read', name: 'View Blog', description: 'Can view blog posts', module: 'Blog' },
-  { id: 'blog_write', name: 'Manage Blog', description: 'Can create, edit and delete blog posts', module: 'Blog' },
-  { id: 'vendors_read', name: 'View Vendors', description: 'Can view vendor listings', module: 'Vendors' },
-  { id: 'vendors_write', name: 'Manage Vendors', description: 'Can create, edit and delete vendors', module: 'Vendors' },
-  { id: 'marketing_read', name: 'View Marketing', description: 'Can view marketing campaigns', module: 'Marketing' },
-  { id: 'marketing_write', name: 'Manage Marketing', description: 'Can create and manage marketing campaigns', module: 'Marketing' },
-  { id: 'settings_read', name: 'View Settings', description: 'Can view system settings', module: 'Settings' },
-  { id: 'settings_write', name: 'Manage Settings', description: 'Can modify system settings', module: 'Settings' },
-  { id: 'all_access', name: 'Full Access', description: 'Has access to all features', module: 'System' }
-];
-
-const availableRoles = [
-  { id: 'admin', name: 'Admin' },
-  { id: 'manager', name: 'Manager' },
-  { id: 'editor', name: 'Editor' },
-  { id: 'staff', name: 'Staff' }
-];
-
-const availableDepartments = [
-  { id: 'management', name: 'Management' },
-  { id: 'sales', name: 'Sales' },
-  { id: 'marketing', name: 'Marketing' },
-  { id: 'content', name: 'Content' },
-  { id: 'support', name: 'Support' },
-  { id: 'development', name: 'Development' },
-  { id: 'design', name: 'Design' }
+// Sample employees data
+const initialEmployees: Employee[] = [
+  {
+    id: 1,
+    name: 'Sarah Johnson',
+    email: 'sarah.johnson@example.com',
+    phone: '(555) 123-4567',
+    role: 'Administrator',
+    status: 'active',
+    joinDate: '2023-01-15',
+    lastActive: '2024-06-10 09:45 AM'
+  },
+  {
+    id: 2,
+    name: 'Michael Chen',
+    email: 'michael.chen@example.com',
+    phone: '(555) 987-6543',
+    role: 'Product Manager',
+    status: 'active',
+    joinDate: '2023-03-22',
+    lastActive: '2024-06-10 08:30 AM'
+  },
+  {
+    id: 3,
+    name: 'Jessica Smith',
+    email: 'jessica.smith@example.com',
+    phone: '(555) 456-7890',
+    role: 'Marketing Specialist',
+    status: 'active',
+    joinDate: '2023-05-10',
+    lastActive: '2024-06-09 04:15 PM'
+  },
+  {
+    id: 4,
+    name: 'David Wilson',
+    email: 'david.wilson@example.com',
+    phone: '(555) 234-5678',
+    role: 'Order Processor',
+    status: 'active',
+    joinDate: '2023-02-28',
+    lastActive: '2024-06-10 11:20 AM'
+  },
+  {
+    id: 5,
+    name: 'Emily Rodriguez',
+    email: 'emily.rodriguez@example.com',
+    phone: '(555) 876-5432',
+    role: 'Vendor Manager',
+    status: 'active',
+    joinDate: '2023-04-15',
+    lastActive: '2024-06-10 10:05 AM'
+  },
+  {
+    id: 6,
+    name: 'Robert Taylor',
+    email: 'robert.taylor@example.com',
+    phone: '(555) 345-6789',
+    role: 'Administrator',
+    status: 'inactive',
+    joinDate: '2023-01-05',
+    lastActive: '2024-05-20 03:45 PM',
+    notes: 'On extended leave until July 2024'
+  },
+  {
+    id: 7,
+    name: 'Amanda Brown',
+    email: 'amanda.brown@example.com',
+    phone: '(555) 567-8901',
+    role: 'Order Processor',
+    status: 'active',
+    joinDate: '2023-06-20',
+    lastActive: '2024-06-09 05:30 PM'
+  }
 ];
 
 const EmployeeManagement = () => {
   const { toast } = useToast();
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
+  const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Dialog state
   const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false);
   const [isEditEmployeeOpen, setIsEditEmployeeOpen] = useState(false);
-  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
-  const [currentEmployee, setCurrentEmployee] = useState<Employee | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [isAddRoleOpen, setIsAddRoleOpen] = useState(false);
+  const [isEditRoleOpen, setIsEditRoleOpen] = useState(false);
+  const [isViewPermissionsOpen, setIsViewPermissionsOpen] = useState(false);
   
-  const [newEmployee, setNewEmployee] = useState<Partial<Employee>>({
+  // Current items for editing
+  const [currentEmployee, setCurrentEmployee] = useState<Employee | null>(null);
+  const [currentRole, setCurrentRole] = useState<Role | null>(null);
+  
+  // New employee form state
+  const [newEmployee, setNewEmployee] = useState<Omit<Employee, 'id'>>({
     name: '',
     email: '',
+    phone: '',
     role: '',
-    department: '',
     status: 'active',
+    joinDate: new Date().toISOString().split('T')[0]
+  });
+  
+  // New role form state
+  const [newRole, setNewRole] = useState<Omit<Role, 'id' | 'employeeCount'>>({
+    name: '',
+    description: '',
     permissions: []
   });
 
-  const filteredEmployees = employees.filter(employee => 
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleAddEmployee = () => {
-    const id = Math.max(...employees.map(e => e.id), 0) + 1;
-    const currentDate = new Date().toISOString();
-    
-    const newEmployeeWithId: Employee = {
-      ...newEmployee as Employee,
-      id,
-      lastActive: currentDate,
-      permissions: selectedPermissions
-    };
-    
-    setEmployees([...employees, newEmployeeWithId]);
-    setNewEmployee({
-      name: '',
-      email: '',
-      role: '',
-      department: '',
-      status: 'active',
-      permissions: []
-    });
-    setSelectedPermissions([]);
-    setIsAddEmployeeOpen(false);
-    
-    toast({
-      title: "Employee Added",
-      description: `${newEmployeeWithId.name} has been added successfully.`
-    });
-  };
-
-  const handleEditEmployee = () => {
-    if (!currentEmployee) return;
-    
-    const updatedEmployees = employees.map(emp => 
-      emp.id === currentEmployee.id ? {...currentEmployee, permissions: selectedPermissions} : emp
-    );
-    
-    setEmployees(updatedEmployees);
-    setIsEditEmployeeOpen(false);
-    setCurrentEmployee(null);
-    
-    toast({
-      title: "Employee Updated",
-      description: `The employee has been updated successfully.`
-    });
-  };
-
-  const handleDeleteEmployee = (id: number) => {
-    setEmployees(employees.filter(emp => emp.id !== id));
-    
-    toast({
-      title: "Employee Deleted",
-      description: `The employee has been deleted successfully.`,
-      variant: "destructive"
-    });
-  };
-
-  const handleExportToExcel = () => {
+  const handleExportEmployees = () => {
     toast({
       title: "Export Started",
       description: "Employee data is being exported as an Excel file.",
     });
     
-    // Simulate download delay
     setTimeout(() => {
       toast({
         title: "Export Complete",
@@ -206,355 +251,359 @@ const EmployeeManagement = () => {
     }, 1500);
   };
 
-  const handlePermissionChange = (permissionId: string, isChecked: boolean) => {
-    if (isChecked) {
-      setSelectedPermissions([...selectedPermissions, permissionId]);
-    } else {
-      setSelectedPermissions(selectedPermissions.filter(id => id !== permissionId));
+  const handleAddEmployee = () => {
+    const id = Math.max(0, ...employees.map(e => e.id)) + 1;
+    
+    const employee: Employee = {
+      id,
+      ...newEmployee
+    };
+    
+    setEmployees([...employees, employee]);
+    setIsAddEmployeeOpen(false);
+    setNewEmployee({
+      name: '',
+      email: '',
+      phone: '',
+      role: '',
+      status: 'active',
+      joinDate: new Date().toISOString().split('T')[0]
+    });
+    
+    toast({
+      title: "Employee Added",
+      description: `${employee.name} has been added successfully.`,
+    });
+  };
+
+  const handleUpdateEmployee = () => {
+    if (!currentEmployee) return;
+    
+    setEmployees(employees.map(emp => 
+      emp.id === currentEmployee.id ? currentEmployee : emp
+    ));
+    
+    setIsEditEmployeeOpen(false);
+    
+    toast({
+      title: "Employee Updated",
+      description: `${currentEmployee.name}'s information has been updated.`,
+    });
+  };
+
+  const handleDeleteEmployee = (id: number) => {
+    const employeeToDelete = employees.find(e => e.id === id);
+    if (!employeeToDelete) return;
+    
+    setEmployees(employees.filter(e => e.id !== id));
+    
+    toast({
+      title: "Employee Removed",
+      description: `${employeeToDelete.name} has been removed.`,
+      variant: "destructive",
+    });
+  };
+
+  const handleAddRole = () => {
+    const id = Math.max(0, ...roles.map(r => r.id)) + 1;
+    
+    const role: Role = {
+      id,
+      ...newRole,
+      employeeCount: 0
+    };
+    
+    setRoles([...roles, role]);
+    setIsAddRoleOpen(false);
+    setNewRole({
+      name: '',
+      description: '',
+      permissions: []
+    });
+    
+    toast({
+      title: "Role Created",
+      description: `${role.name} role has been created successfully.`,
+    });
+  };
+
+  const handleUpdateRole = () => {
+    if (!currentRole) return;
+    
+    setRoles(roles.map(role => 
+      role.id === currentRole.id ? currentRole : role
+    ));
+    
+    setIsEditRoleOpen(false);
+    
+    toast({
+      title: "Role Updated",
+      description: `${currentRole.name} role has been updated.`,
+    });
+  };
+
+  const handleDeleteRole = (id: number) => {
+    const roleToDelete = roles.find(r => r.id === id);
+    if (!roleToDelete) return;
+    
+    // Check if any employees are using this role
+    const employeesWithRole = employees.filter(e => e.role === roleToDelete.name);
+    
+    if (employeesWithRole.length > 0) {
+      toast({
+        title: "Cannot Delete Role",
+        description: `This role is assigned to ${employeesWithRole.length} employees. Reassign them first.`,
+        variant: "destructive",
+      });
+      return;
     }
+    
+    setRoles(roles.filter(r => r.id !== id));
+    
+    toast({
+      title: "Role Deleted",
+      description: `${roleToDelete.name} role has been deleted.`,
+      variant: "destructive",
+    });
   };
 
-  const openEditModal = (employee: Employee) => {
-    setCurrentEmployee(employee);
-    setSelectedPermissions(employee.permissions);
-    setIsEditEmployeeOpen(true);
+  const togglePermission = (permissionId: string) => {
+    if (!currentRole) return;
+    
+    const updatedPermissions = currentRole.permissions.includes(permissionId)
+      ? currentRole.permissions.filter(id => id !== permissionId)
+      : [...currentRole.permissions, permissionId];
+    
+    setCurrentRole({
+      ...currentRole,
+      permissions: updatedPermissions
+    });
   };
 
-  const openPermissionModal = (employee: Employee) => {
-    setCurrentEmployee(employee);
-    setSelectedPermissions(employee.permissions);
-    setIsPermissionModalOpen(true);
-  };
-
-  const groupedPermissions = availablePermissions.reduce((acc, permission) => {
-    if (!acc[permission.module]) {
-      acc[permission.module] = [];
-    }
-    acc[permission.module].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>);
+  const filteredEmployees = employees.filter(employee => 
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Employee Management</h1>
           <p className="text-muted-foreground">
-            Manage employees and their access permissions.
+            Manage employees and their access permissions
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={handleExportToExcel}>
-            <Download className="mr-2 h-4 w-4" /> Export to Excel
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleExportEmployees} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export to Excel
           </Button>
-          <Button onClick={() => setIsAddEmployeeOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Add Employee
+          <Button 
+            onClick={() => setIsAddEmployeeOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Employee
           </Button>
         </div>
       </div>
-      
-      <Tabs defaultValue="all">
+
+      <div className="flex items-center mb-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search employees..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <Tabs defaultValue="employees">
         <TabsList>
-          <TabsTrigger value="all">All Employees</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
-          <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          <TabsTrigger value="employees" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Employees
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Roles & Permissions
+          </TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search employees..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-          
+
+        <TabsContent value="employees" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Employee List ({filteredEmployees.length})
+                Employee Directory ({filteredEmployees.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4">Name</th>
-                      <th className="text-left py-3 px-4">Email</th>
-                      <th className="text-left py-3 px-4">Role</th>
-                      <th className="text-left py-3 px-4">Department</th>
-                      <th className="text-left py-3 px-4">Status</th>
-                      <th className="text-right py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEmployees.map((employee) => (
-                      <tr key={employee.id} className="border-b">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                              {employee.name.charAt(0)}
-                            </div>
-                            <span>{employee.name}</span>
+              <div className="space-y-4">
+                {filteredEmployees.length === 0 ? (
+                  <p className="text-center py-4 text-gray-500">No employees found.</p>
+                ) : (
+                  filteredEmployees.map((employee) => (
+                    <div 
+                      key={employee.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg bg-card"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <UserCircle className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{employee.name}</h3>
+                            <Badge 
+                              className={employee.status === 'active' 
+                                ? "bg-green-100 text-green-800 hover:bg-green-100" 
+                                : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                              }
+                            >
+                              {employee.status === 'active' ? 'Active' : 'Inactive'}
+                            </Badge>
                           </div>
-                        </td>
-                        <td className="py-3 px-4">{employee.email}</td>
-                        <td className="py-3 px-4">{employee.role}</td>
-                        <td className="py-3 px-4">{employee.department}</td>
-                        <td className="py-3 px-4">
-                          <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
-                            {employee.status === 'active' ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => openPermissionModal(employee)}
-                            >
-                              <Shield className="h-4 w-4" />
-                              <span className="ml-2 hidden sm:inline">Permissions</span>
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => openEditModal(employee)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span className="ml-2 hidden sm:inline">Edit</span>
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-red-500 hover:text-red-500"
-                              onClick={() => handleDeleteEmployee(employee.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="ml-2 hidden sm:inline">Delete</span>
-                            </Button>
+                          <div className="text-sm text-muted-foreground">
+                            <div className="flex items-center gap-4">
+                              <span className="flex items-center gap-1">
+                                <Mail className="h-3 w-3" />
+                                {employee.email}
+                              </span>
+                              {employee.phone && (
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {employee.phone}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1">
+                              <span className="mr-3">Role: {employee.role}</span>
+                              <span>Joined: {employee.joinDate}</span>
+                            </div>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-                {filteredEmployees.length === 0 && (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground">No employees found.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="active" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search active employees..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4">Name</th>
-                      <th className="text-left py-3 px-4">Email</th>
-                      <th className="text-left py-3 px-4">Role</th>
-                      <th className="text-left py-3 px-4">Department</th>
-                      <th className="text-right py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEmployees
-                      .filter(emp => emp.status === 'active')
-                      .map((employee) => (
-                        <tr key={employee.id} className="border-b">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                {employee.name.charAt(0)}
-                              </div>
-                              <span>{employee.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">{employee.email}</td>
-                          <td className="py-3 px-4">{employee.role}</td>
-                          <td className="py-3 px-4">{employee.department}</td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => openEditModal(employee)}
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span className="ml-2 hidden sm:inline">Edit</span>
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-                {filteredEmployees.filter(emp => emp.status === 'active').length === 0 && (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground">No active employees found.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="inactive" className="space-y-4">
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4">Name</th>
-                      <th className="text-left py-3 px-4">Email</th>
-                      <th className="text-left py-3 px-4">Role</th>
-                      <th className="text-left py-3 px-4">Last Active</th>
-                      <th className="text-right py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredEmployees
-                      .filter(emp => emp.status === 'inactive')
-                      .map((employee) => (
-                        <tr key={employee.id} className="border-b">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                                {employee.name.charAt(0)}
-                              </div>
-                              <span>{employee.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">{employee.email}</td>
-                          <td className="py-3 px-4">{employee.role}</td>
-                          <td className="py-3 px-4">
-                            {new Date(employee.lastActive).toLocaleDateString()}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                const updatedEmployees = employees.map(emp => 
-                                  emp.id === employee.id ? {...emp, status: 'active' as const} : emp
-                                );
-                                setEmployees(updatedEmployees);
-                                toast({
-                                  title: "Employee Activated",
-                                  description: `${employee.name} has been reactivated.`
-                                });
-                              }}
-                            >
-                              Reactivate
-                            </Button>
-                          </td>
-                        </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-                {filteredEmployees.filter(emp => emp.status === 'inactive').length === 0 && (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground">No inactive employees found.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="permissions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Role-Based Permissions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {Object.entries(availableRoles).map(([_, role]) => (
-                  <div key={role.id} className="space-y-2">
-                    <h3 className="font-medium text-lg">{role.name}</h3>
-                    <div className="bg-muted p-4 rounded-md">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Object.entries(groupedPermissions).map(([module, permissions]) => (
-                          <div key={module} className="space-y-2">
-                            <h4 className="font-medium text-sm">{module}</h4>
-                            <ul className="space-y-1">
-                              {permissions.map(permission => (
-                                <li key={permission.id} className="text-sm text-muted-foreground">
-                                  {role.id === 'admin' || 
-                                   (role.id === 'manager' && !permission.id.includes('settings_write')) ||
-                                   (role.id === 'editor' && permission.id.includes('blog')) ||
-                                   (role.id === 'staff' && permission.id.includes('read')) ? (
-                                    <span className="flex items-center gap-2">
-                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M13.3334 4L6.00008 11.3333L2.66675 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                      </svg>
-                                      {permission.name}
-                                    </span>
-                                  ) : (
-                                    <span className="flex items-center gap-2 text-gray-400">
-                                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                      </svg>
-                                      {permission.name}
-                                    </span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setCurrentEmployee(employee);
+                            setIsEditEmployeeOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleDeleteEmployee(employee.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="roles" className="mt-6">
+          <div className="flex justify-end mb-4">
+            <Button 
+              onClick={() => setIsAddRoleOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create Role
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {roles.map((role) => (
+              <Card key={role.id}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        {role.name.includes('Admin') ? (
+                          <ShieldCheck className="h-6 w-6 text-primary" />
+                        ) : (
+                          <Shield className="h-6 w-6 text-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">{role.name}</h3>
+                        <p className="text-sm text-muted-foreground">{role.description}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant="outline">{role.employeeCount} Employees</Badge>
+                          <Badge variant="outline">{role.permissions.length} Permissions</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setCurrentRole(role);
+                          setIsViewPermissionsOpen(true);
+                        }}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Permissions
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setCurrentRole(role);
+                          setIsEditRoleOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeleteRole(role.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
       </Tabs>
-      
-      {/* Add Employee Modal */}
+
+      {/* Add Employee Dialog */}
       <Dialog open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
-              Add New Employee
-            </DialogTitle>
+            <DialogTitle>Add New Employee</DialogTitle>
             <DialogDescription>
-              Create a new employee account with appropriate permissions.
+              Create a new employee account with role assignment.
             </DialogDescription>
           </DialogHeader>
           
@@ -563,76 +612,68 @@ const EmployeeManagement = () => {
             handleAddEmployee();
           }}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input 
-                    id="name" 
-                    value={newEmployee.name} 
-                    onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-                    required 
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={newEmployee.email} 
-                    onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
-                    required 
-                  />
-                </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <Input
+                  id="name"
+                  value={newEmployee.name}
+                  onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                  className="col-span-3"
+                  required
+                />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select 
-                    value={newEmployee.role} 
-                    onValueChange={(value) => setNewEmployee({...newEmployee, role: value})}
-                  >
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableRoles.map(role => (
-                        <SelectItem key={role.id} value={role.name}>
-                          {role.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <Select 
-                    value={newEmployee.department} 
-                    onValueChange={(value) => setNewEmployee({...newEmployee, department: value})}
-                  >
-                    <SelectTrigger id="department">
-                      <SelectValue placeholder="Select department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableDepartments.map(dept => (
-                        <SelectItem key={dept.id} value={dept.name}>
-                          {dept.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={newEmployee.email}
+                  onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                  className="col-span-3"
+                  required
+                />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select 
-                  value={newEmployee.status} 
-                  onValueChange={(value: 'active' | 'inactive') => setNewEmployee({...newEmployee, status: value})}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">Phone</Label>
+                <Input
+                  id="phone"
+                  value={newEmployee.phone}
+                  onChange={(e) => setNewEmployee({...newEmployee, phone: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right">Role</Label>
+                <Select
+                  value={newEmployee.role}
+                  onValueChange={(value) => setNewEmployee({...newEmployee, role: value})}
                 >
-                  <SelectTrigger id="status">
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
+                        {role.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">Status</Label>
+                <Select
+                  value={newEmployee.status}
+                  onValueChange={(value) => setNewEmployee({
+                    ...newEmployee, 
+                    status: value as 'active' | 'inactive'
+                  })}
+                >
+                  <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -642,46 +683,36 @@ const EmployeeManagement = () => {
                 </Select>
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-base">Permissions</Label>
-                <div className="bg-muted p-4 rounded-md max-h-60 overflow-y-auto">
-                  <div className="space-y-4">
-                    {Object.entries(groupedPermissions).map(([module, permissions]) => (
-                      <div key={module} className="space-y-2">
-                        <h4 className="font-medium text-sm">{module}</h4>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                          {permissions.map((permission) => (
-                            <div key={permission.id} className="flex items-start space-x-2">
-                              <Checkbox 
-                                id={`permission-${permission.id}`}
-                                checked={selectedPermissions.includes(permission.id)}
-                                onCheckedChange={(checked) => 
-                                  handlePermissionChange(permission.id, checked as boolean)
-                                }
-                              />
-                              <div className="grid gap-1.5 leading-none">
-                                <Label
-                                  htmlFor={`permission-${permission.id}`}
-                                  className="text-sm font-medium leading-none cursor-pointer"
-                                >
-                                  {permission.name}
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                  {permission.description}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="joinDate" className="text-right">Join Date</Label>
+                <Input
+                  id="joinDate"
+                  type="date"
+                  value={newEmployee.joinDate}
+                  onChange={(e) => setNewEmployee({...newEmployee, joinDate: e.target.value})}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="notes" className="text-right pt-2">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={newEmployee.notes || ''}
+                  onChange={(e) => setNewEmployee({...newEmployee, notes: e.target.value})}
+                  className="col-span-3"
+                  rows={3}
+                />
               </div>
             </div>
             
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsAddEmployeeOpen(false)}>
+              <Button
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsAddEmployeeOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">
@@ -691,96 +722,85 @@ const EmployeeManagement = () => {
           </form>
         </DialogContent>
       </Dialog>
-      
-      {/* Edit Employee Modal */}
-      <Dialog open={isEditEmployeeOpen} onOpenChange={setIsEditEmployeeOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Employee
-            </DialogTitle>
-            <DialogDescription>
-              Update employee details and permissions.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {currentEmployee && (
+
+      {/* Edit Employee Dialog */}
+      {currentEmployee && (
+        <Dialog open={isEditEmployeeOpen} onOpenChange={setIsEditEmployeeOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Edit Employee</DialogTitle>
+              <DialogDescription>
+                Update employee information and role assignment.
+              </DialogDescription>
+            </DialogHeader>
+            
             <form onSubmit={(e) => {
               e.preventDefault();
-              handleEditEmployee();
+              handleUpdateEmployee();
             }}>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-name">Full Name</Label>
-                    <Input 
-                      id="edit-name" 
-                      value={currentEmployee.name} 
-                      onChange={(e) => setCurrentEmployee({...currentEmployee, name: e.target.value})}
-                      required 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-email">Email</Label>
-                    <Input 
-                      id="edit-email" 
-                      type="email" 
-                      value={currentEmployee.email} 
-                      onChange={(e) => setCurrentEmployee({...currentEmployee, email: e.target.value})}
-                      required 
-                    />
-                  </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-name" className="text-right">Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={currentEmployee.name}
+                    onChange={(e) => setCurrentEmployee({...currentEmployee, name: e.target.value})}
+                    className="col-span-3"
+                    required
+                  />
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-role">Role</Label>
-                    <Select 
-                      value={currentEmployee.role} 
-                      onValueChange={(value) => setCurrentEmployee({...currentEmployee, role: value})}
-                    >
-                      <SelectTrigger id="edit-role">
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableRoles.map(role => (
-                          <SelectItem key={role.id} value={role.name}>
-                            {role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-department">Department</Label>
-                    <Select 
-                      value={currentEmployee.department} 
-                      onValueChange={(value) => setCurrentEmployee({...currentEmployee, department: value})}
-                    >
-                      <SelectTrigger id="edit-department">
-                        <SelectValue placeholder="Select department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableDepartments.map(dept => (
-                          <SelectItem key={dept.id} value={dept.name}>
-                            {dept.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-email" className="text-right">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={currentEmployee.email}
+                    onChange={(e) => setCurrentEmployee({...currentEmployee, email: e.target.value})}
+                    className="col-span-3"
+                    required
+                  />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-status">Status</Label>
-                  <Select 
-                    value={currentEmployee.status} 
-                    onValueChange={(value: 'active' | 'inactive') => setCurrentEmployee({...currentEmployee, status: value})}
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-phone" className="text-right">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    value={currentEmployee.phone || ''}
+                    onChange={(e) => setCurrentEmployee({...currentEmployee, phone: e.target.value})}
+                    className="col-span-3"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-role" className="text-right">Role</Label>
+                  <Select
+                    value={currentEmployee.role}
+                    onValueChange={(value) => setCurrentEmployee({...currentEmployee, role: value})}
                   >
-                    <SelectTrigger id="edit-status">
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.name}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-status" className="text-right">Status</Label>
+                  <Select
+                    value={currentEmployee.status}
+                    onValueChange={(value) => setCurrentEmployee({
+                      ...currentEmployee, 
+                      status: value as 'active' | 'inactive'
+                    })}
+                  >
+                    <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -789,10 +809,37 @@ const EmployeeManagement = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-joinDate" className="text-right">Join Date</Label>
+                  <Input
+                    id="edit-joinDate"
+                    type="date"
+                    value={currentEmployee.joinDate}
+                    onChange={(e) => setCurrentEmployee({...currentEmployee, joinDate: e.target.value})}
+                    className="col-span-3"
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="edit-notes" className="text-right pt-2">Notes</Label>
+                  <Textarea
+                    id="edit-notes"
+                    value={currentEmployee.notes || ''}
+                    onChange={(e) => setCurrentEmployee({...currentEmployee, notes: e.target.value})}
+                    className="col-span-3"
+                    rows={3}
+                  />
+                </div>
               </div>
               
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsEditEmployeeOpen(false)}>
+                <Button
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditEmployeeOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -800,119 +847,253 @@ const EmployeeManagement = () => {
                 </Button>
               </DialogFooter>
             </form>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Permissions Modal */}
-      <Dialog open={isPermissionModalOpen} onOpenChange={setIsPermissionModalOpen}>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Add Role Dialog */}
+      <Dialog open={isAddRoleOpen} onOpenChange={setIsAddRoleOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Manage Permissions
-            </DialogTitle>
+            <DialogTitle>Create New Role</DialogTitle>
             <DialogDescription>
-              {currentEmployee && `Update permissions for ${currentEmployee.name}`}
+              Define a new role and set its permissions.
             </DialogDescription>
           </DialogHeader>
           
-          {currentEmployee && (
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const updatedEmployees = employees.map(emp => 
-                emp.id === currentEmployee.id ? {...currentEmployee, permissions: selectedPermissions} : emp
-              );
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleAddRole();
+          }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role-name" className="text-right">Role Name</Label>
+                <Input
+                  id="role-name"
+                  value={newRole.name}
+                  onChange={(e) => setNewRole({...newRole, name: e.target.value})}
+                  className="col-span-3"
+                  required
+                />
+              </div>
               
-              setEmployees(updatedEmployees);
-              setIsPermissionModalOpen(false);
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="role-desc" className="text-right pt-2">Description</Label>
+                <Textarea
+                  id="role-desc"
+                  value={newRole.description}
+                  onChange={(e) => setNewRole({...newRole, description: e.target.value})}
+                  className="col-span-3"
+                  rows={2}
+                  required
+                />
+              </div>
               
-              toast({
-                title: "Permissions Updated",
-                description: `Permissions for ${currentEmployee.name} have been updated successfully.`
-              });
-            }}>
-              <div className="space-y-4 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium">Quick Assign</h4>
-                    <p className="text-sm text-muted-foreground">Apply preset permission groups</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedPermissions(['all_access'])}
-                    >
-                      Full Access
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedPermissions(
-                        availablePermissions
-                          .filter(p => p.id.includes('read') && p.id !== 'all_access')
-                          .map(p => p.id)
-                      )}
-                    >
-                      Read Only
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="bg-muted p-4 rounded-md max-h-96 overflow-y-auto">
-                  <div className="space-y-4">
-                    {Object.entries(groupedPermissions).map(([module, permissions]) => (
-                      <div key={module} className="space-y-2">
-                        <h4 className="font-medium text-sm">{module}</h4>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                          {permissions.map((permission) => (
-                            <div key={permission.id} className="flex items-start space-x-2">
-                              <Checkbox 
-                                id={`edit-permission-${permission.id}`}
-                                checked={selectedPermissions.includes(permission.id)}
-                                onCheckedChange={(checked) => 
-                                  handlePermissionChange(permission.id, checked as boolean)
-                                }
-                                disabled={
-                                  selectedPermissions.includes('all_access') && 
-                                  permission.id !== 'all_access'
-                                }
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">Permissions</Label>
+                <div className="col-span-3 border rounded-md p-4 space-y-4">
+                  {['products', 'vendors', 'orders', 'analytics', 'marketing', 'blog', 'settings'].map((category) => {
+                    const categoryPermissions = permissions.filter(p => p.category === category);
+                    return (
+                      <div key={category} className="space-y-2">
+                        <h4 className="font-medium capitalize">{category}</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {categoryPermissions.map(permission => (
+                            <div key={permission.id} className="flex items-center space-x-2">
+                              <Switch
+                                id={`perm-${permission.id}`}
+                                checked={newRole.permissions.includes(permission.id)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setNewRole({
+                                      ...newRole,
+                                      permissions: [...newRole.permissions, permission.id]
+                                    });
+                                  } else {
+                                    setNewRole({
+                                      ...newRole,
+                                      permissions: newRole.permissions.filter(id => id !== permission.id)
+                                    });
+                                  }
+                                }}
                               />
-                              <div className="grid gap-1.5 leading-none">
-                                <Label
-                                  htmlFor={`edit-permission-${permission.id}`}
-                                  className="text-sm font-medium leading-none cursor-pointer"
-                                >
-                                  {permission.name}
-                                </Label>
-                                <p className="text-xs text-muted-foreground">
-                                  {permission.description}
-                                </p>
-                              </div>
+                              <Label htmlFor={`perm-${permission.id}`} className="text-sm cursor-pointer">
+                                {permission.name}
+                              </Label>
                             </div>
                           ))}
                         </div>
                       </div>
-                    ))}
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsAddRoleOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Create Role
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Role Dialog */}
+      {currentRole && (
+        <Dialog open={isEditRoleOpen} onOpenChange={setIsEditRoleOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Edit Role</DialogTitle>
+              <DialogDescription>
+                Update role details and permissions.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdateRole();
+            }}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-role-name" className="text-right">Role Name</Label>
+                  <Input
+                    id="edit-role-name"
+                    value={currentRole.name}
+                    onChange={(e) => setCurrentRole({...currentRole, name: e.target.value})}
+                    className="col-span-3"
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="edit-role-desc" className="text-right pt-2">Description</Label>
+                  <Textarea
+                    id="edit-role-desc"
+                    value={currentRole.description}
+                    onChange={(e) => setCurrentRole({...currentRole, description: e.target.value})}
+                    className="col-span-3"
+                    rows={2}
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label className="text-right pt-2">Permissions</Label>
+                  <div className="col-span-3 border rounded-md p-4 space-y-4">
+                    {['products', 'vendors', 'orders', 'analytics', 'marketing', 'blog', 'settings'].map((category) => {
+                      const categoryPermissions = permissions.filter(p => p.category === category);
+                      return (
+                        <div key={category} className="space-y-2">
+                          <h4 className="font-medium capitalize">{category}</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {categoryPermissions.map(permission => (
+                              <div key={permission.id} className="flex items-center space-x-2">
+                                <Switch
+                                  id={`edit-perm-${permission.id}`}
+                                  checked={currentRole.permissions.includes(permission.id)}
+                                  onCheckedChange={() => togglePermission(permission.id)}
+                                />
+                                <Label htmlFor={`edit-perm-${permission.id}`} className="text-sm cursor-pointer">
+                                  {permission.name}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
               
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsPermissionModalOpen(false)}>
+                <Button
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditRoleOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">
-                  Update Permissions
+                  Save Changes
                 </Button>
               </DialogFooter>
             </form>
-          )}
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* View Permissions Dialog */}
+      {currentRole && (
+        <Dialog open={isViewPermissionsOpen} onOpenChange={setIsViewPermissionsOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                {currentRole.name} Permissions
+              </DialogTitle>
+              <DialogDescription>
+                Current permissions assigned to this role.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <div className="space-y-4">
+                {['products', 'vendors', 'orders', 'analytics', 'marketing', 'blog', 'settings'].map((category) => {
+                  const categoryPermissions = permissions.filter(p => 
+                    p.category === category && currentRole.permissions.includes(p.id)
+                  );
+                  
+                  if (categoryPermissions.length === 0) return null;
+                  
+                  return (
+                    <div key={category} className="space-y-2">
+                      <h4 className="font-medium capitalize">{category}</h4>
+                      <div className="border rounded-md p-3 space-y-2">
+                        {categoryPermissions.map(permission => (
+                          <div key={permission.id} className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <div>
+                              <p className="text-sm font-medium">{permission.name}</p>
+                              <p className="text-xs text-muted-foreground">{permission.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {currentRole.permissions.length === 0 && (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No permissions assigned to this role.
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setIsViewPermissionsOpen(false);
+                  setCurrentRole(currentRole);
+                  setIsEditRoleOpen(true);
+                }}
+              >
+                Edit Permissions
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

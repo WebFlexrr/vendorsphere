@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, ChevronRight, BarChart, Megaphone, 
-  FileText 
+  FileText, UserCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useLocation, Link } from 'react-router-dom';
+import UserProfileDropdown from '@/components/admin/UserProfileDropdown';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -69,14 +70,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </a>
         </div>
         <div className="flex items-center">
-          <Button variant="ghost" size="sm" className="flex items-center gap-2">
-            <img 
-              src="https://ui-avatars.com/api/?name=Admin+User&background=FF6B6B&color=fff" 
-              className="h-7 w-7 md:h-8 md:w-8 rounded-full" 
-              alt="Admin" 
-            />
-            <span className="hidden md:inline">Admin User</span>
-          </Button>
+          <UserProfileDropdown />
         </div>
       </header>
 
@@ -116,6 +110,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 label="Orders" 
                 href="/admin/orders" 
                 active={location.pathname === '/admin/orders'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Package} 
+                label="Inventory" 
+                href="/admin/inventory" 
+                active={location.pathname === '/admin/inventory'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={UserCircle} 
+                label="Employees" 
+                href="/admin/employees" 
+                active={location.pathname === '/admin/employees'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
