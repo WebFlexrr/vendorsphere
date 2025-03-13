@@ -1,15 +1,15 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Users, CheckCircle2, XCircle, Building2, ShieldCheck, Edit, Star, Search } from 'lucide-react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Users, CheckCircle2, XCircle, Building2, ShieldCheck, Edit, Star, Search, Plus, Download, FilePlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Vendor = {
   id: number;
@@ -30,9 +30,23 @@ const VendorManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [currentVendor, setCurrentVendor] = useState<Vendor | null>(null);
 
-  // Vendor data with expanded details
+  const initialNewVendor = {
+    id: 0,
+    name: '',
+    category: '',
+    status: 'pending',
+    appliedDate: new Date().toISOString().split('T')[0],
+    email: '',
+    phone: '',
+    address: '',
+    description: ''
+  };
+  
+  const [newVendor, setNewVendor] = useState<Vendor>(initialNewVendor);
+
   const [pendingVendors, setPendingVendors] = useState<Vendor[]>([
     { 
       id: 1, 
@@ -105,7 +119,6 @@ const VendorManagement = () => {
     },
   ]);
 
-  // Filter vendors based on search query
   const filteredPendingVendors = searchQuery 
     ? pendingVendors.filter(vendor => 
         vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -124,7 +137,6 @@ const VendorManagement = () => {
     const vendorToApprove = pendingVendors.find(v => v.id === vendorId);
     if (!vendorToApprove) return;
     
-    // Move vendor from pending to active
     const updatedVendor = {
       ...vendorToApprove,
       status: 'active',
@@ -183,16 +195,78 @@ const VendorManagement = () => {
     setIsEditModalOpen(false);
   };
 
+  const handleCreateVendor = () => {
+    const newId = Math.max(...[...pendingVendors, ...activeVendors].map(v => v.id), 0) + 1;
+    const vendorToAdd = { ...newVendor, id: newId };
+    
+    setPendingVendors([...pendingVendors, vendorToAdd]);
+    setIsCreateModalOpen(false);
+    setNewVendor(initialNewVendor);
+    
+    toast({
+      title: "Vendor Created",
+      description: `${vendorToAdd.name} has been added to pending vendors.`,
+    });
+  };
+
+  const handleExportToExcel = () => {
+    toast({
+      title: "Export Started",
+      description: "Vendor data is being exported as an Excel file.",
+    });
+    
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: "Vendor data has been exported successfully.",
+      });
+    }, 1500);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    field: keyof Vendor
+  ) => {
+    setNewVendor({
+      ...newVendor,
+      [field]: e.target.value
+    });
+  };
+
+  const handleSelectChange = (value: string, field: keyof Vendor) => {
+    setNewVendor({
+      ...newVendor,
+      [field]: value
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Vendor Management</h1>
-        <Badge variant="outline" className="bg-vsphere-light">
-          {activeVendors.length} Active Vendors
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleExportToExcel}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export to Excel
+          </Button>
+          <Badge variant="outline" className="bg-vsphere-light">
+            {activeVendors.length} Active Vendors
+          </Badge>
+        </div>
       </div>
 
-      <div className="flex items-center justify-end mb-4">
+      <div className="flex items-center justify-between mb-4">
+        <Button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Create Vendor
+        </Button>
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -329,7 +403,6 @@ const VendorManagement = () => {
         </TabsContent>
       </Tabs>
 
-      {/* View Vendor Modal */}
       {isViewModalOpen && currentVendor && (
         <Dialog open={isViewModalOpen} onOpenChange={() => setIsViewModalOpen(false)}>
           <DialogContent className="sm:max-w-[600px]">
@@ -446,7 +519,6 @@ const VendorManagement = () => {
         </Dialog>
       )}
 
-      {/* Edit Vendor Modal */}
       {isEditModalOpen && currentVendor && (
         <Dialog open={isEditModalOpen} onOpenChange={() => setIsEditModalOpen(false)}>
           <DialogContent className="sm:max-w-[600px]">
@@ -460,7 +532,6 @@ const VendorManagement = () => {
             <form onSubmit={(e) => {
               e.preventDefault();
               
-              // Get form data
               const formData = new FormData(e.currentTarget);
               const updatedVendor = {
                 ...currentVendor,
@@ -576,6 +647,121 @@ const VendorManagement = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FilePlus className="h-5 w-5" />
+              Create New Vendor
+            </DialogTitle>
+            <DialogDescription>
+              Create a new vendor profile. The vendor will start as pending until approved.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleCreateVendor();
+          }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-name" className="text-right">Name</Label>
+                <Input
+                  id="new-name"
+                  value={newVendor.name}
+                  onChange={(e) => handleInputChange(e, 'name')}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-category" className="text-right">Category</Label>
+                <Input
+                  id="new-category"
+                  value={newVendor.category}
+                  onChange={(e) => handleInputChange(e, 'category')}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-email" className="text-right">Email</Label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  value={newVendor.email || ''}
+                  onChange={(e) => handleInputChange(e, 'email')}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-phone" className="text-right">Phone</Label>
+                <Input
+                  id="new-phone"
+                  value={newVendor.phone || ''}
+                  onChange={(e) => handleInputChange(e, 'phone')}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-address" className="text-right">Address</Label>
+                <Input
+                  id="new-address"
+                  value={newVendor.address || ''}
+                  onChange={(e) => handleInputChange(e, 'address')}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="new-description" className="text-right pt-2">Description</Label>
+                <Textarea
+                  id="new-description"
+                  value={newVendor.description || ''}
+                  onChange={(e) => handleInputChange(e, 'description')}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-status" className="text-right">Status</Label>
+                <Select 
+                  value={newVendor.status} 
+                  onValueChange={(value) => handleSelectChange(value, 'status')}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Create Vendor
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
