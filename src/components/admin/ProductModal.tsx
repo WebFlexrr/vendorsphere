@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Save, X } from 'lucide-react';
+import { Package, Save, X, FileText, Tag, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export type Product = {
   id: number;
@@ -15,6 +17,34 @@ export type Product = {
   price: number;
   stock: number;
   status: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  seoScore?: number;
+};
+
+interface SeoScoreItem {
+  title: string;
+  score: number;
+  feedback: string;
+}
+
+const SeoScoreItem = ({ title, score, feedback }: SeoScoreItem) => {
+  let colorClass = "bg-green-100 text-green-800";
+  if (score < 70) colorClass = "bg-red-100 text-red-800";
+  else if (score < 90) colorClass = "bg-yellow-100 text-yellow-800";
+
+  return (
+    <div className="flex items-start gap-2">
+      <div className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
+        {score}
+      </div>
+      <div>
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-xs text-muted-foreground">{feedback}</p>
+      </div>
+    </div>
+  );
 };
 
 interface ProductModalProps {
@@ -35,10 +65,50 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
       price: 0,
       stock: 0,
       status: 'Active',
+      seoTitle: '',
+      seoDescription: '',
+      seoKeywords: '',
+      seoScore: 0,
     }
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [seoScoreFeedback, setSeoScoreFeedback] = useState({
+    title: { score: 0, feedback: '' },
+    description: { score: 0, feedback: '' },
+    keywords: { score: 0, feedback: '' },
+  });
+
+  useEffect(() => {
+    updateSeoScores();
+  }, [formData.seoTitle, formData.seoDescription, formData.seoKeywords]);
+
+  const updateSeoScores = () => {
+    const titleScore = formData.seoTitle && formData.seoTitle.length > 10 && formData.seoTitle.length < 70 ? 100 : 50;
+    const descScore = formData.seoDescription && formData.seoDescription.length > 120 && formData.seoDescription.length < 160 ? 100 : 60;
+    const keywordsScore = formData.seoKeywords && formData.seoKeywords.split(',').length >= 3 ? 90 : 70;
+    
+    setSeoScoreFeedback({
+      title: { 
+        score: titleScore,
+        feedback: titleScore < 100 ? 'Title should be between 10-70 characters for best SEO.' : 'Great title length!'
+      },
+      description: { 
+        score: descScore,
+        feedback: descScore < 100 ? 'Meta description should be 120-160 characters.' : 'Optimal meta description length!'
+      },
+      keywords: { 
+        score: keywordsScore,
+        feedback: keywordsScore < 90 ? 'Include at least 3 relevant keywords.' : 'Good keyword set!'
+      }
+    });
+  };
+
+  const calculateOverallSeoScore = () => {
+    const { title, description, keywords } = seoScoreFeedback;
+    return Math.round((title.score + description.score + keywords.score) / 3);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -62,8 +132,11 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     // Update status based on stock
     const status = formData.stock === 0 ? 'Out of stock' : formData.stock < 10 ? 'Low stock' : 'Active';
     
-    // Save the product with updated status
-    onSave({ ...formData, status });
+    // Calculate SEO score
+    const seoScore = calculateOverallSeoScore();
+    
+    // Save the product with updated status and SEO score
+    onSave({ ...formData, status, seoScore });
     
     toast({
       title: product ? "Product Updated" : "Product Created",
@@ -75,7 +148,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -83,71 +156,166 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="col-span-3"
-                required
-              />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="category" className="text-right">Category</Label>
+                <Input
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="vendor" className="text-right">Vendor</Label>
+                <Input
+                  id="vendor"
+                  name="vendor"
+                  value={formData.vendor}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">Price ($)</Label>
+                <Input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="stock" className="text-right">Stock</Label>
+                <Input
+                  id="stock"
+                  name="stock"
+                  type="number"
+                  min="0"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
             </div>
             
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">Category</Label>
-              <Input
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="col-span-3"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="vendor" className="text-right">Vendor</Label>
-              <Input
-                id="vendor"
-                name="vendor"
-                value={formData.vendor}
-                onChange={handleChange}
-                className="col-span-3"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">Price ($)</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={handleChange}
-                className="col-span-3"
-                required
-              />
-            </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="stock" className="text-right">Stock</Label>
-              <Input
-                id="stock"
-                name="stock"
-                type="number"
-                min="0"
-                value={formData.stock}
-                onChange={handleChange}
-                className="col-span-3"
-                required
-              />
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-md flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    SEO Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="seoTitle">SEO Title</Label>
+                    </div>
+                    <Input
+                      id="seoTitle"
+                      name="seoTitle"
+                      placeholder="Optimized title for search engines"
+                      value={formData.seoTitle || ''}
+                      onChange={handleChange}
+                    />
+                    <div className="text-xs text-muted-foreground flex justify-between">
+                      <span>Recommended: 10-70 characters</span>
+                      <span className={(formData.seoTitle?.length || 0) > 70 ? "text-red-500" : ""}>
+                        {formData.seoTitle?.length || 0}/70
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="seoDescription">Meta Description</Label>
+                    </div>
+                    <Textarea
+                      id="seoDescription"
+                      name="seoDescription"
+                      rows={3}
+                      placeholder="Brief description for search results"
+                      value={formData.seoDescription || ''}
+                      onChange={handleChange}
+                    />
+                    <div className="text-xs text-muted-foreground flex justify-between">
+                      <span>Recommended: 120-160 characters</span>
+                      <span className={(formData.seoDescription?.length || 0) > 160 ? "text-red-500" : ""}>
+                        {formData.seoDescription?.length || 0}/160
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="seoKeywords">Focus Keywords</Label>
+                    </div>
+                    <Input
+                      id="seoKeywords"
+                      name="seoKeywords"
+                      placeholder="keyword1, keyword2, keyword3"
+                      value={formData.seoKeywords || ''}
+                      onChange={handleChange}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Separate keywords with commas
+                    </p>
+                  </div>
+                  
+                  {(formData.seoTitle || formData.seoDescription || formData.seoKeywords) && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium">SEO Score: {calculateOverallSeoScore()}%</p>
+                      <div className="space-y-2">
+                        <SeoScoreItem
+                          title="Title"
+                          score={seoScoreFeedback.title.score}
+                          feedback={seoScoreFeedback.title.feedback}
+                        />
+                        <SeoScoreItem
+                          title="Meta Description"
+                          score={seoScoreFeedback.description.score}
+                          feedback={seoScoreFeedback.description.feedback}
+                        />
+                        <SeoScoreItem
+                          title="Keywords"
+                          score={seoScoreFeedback.keywords.score}
+                          feedback={seoScoreFeedback.keywords.feedback}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
           
