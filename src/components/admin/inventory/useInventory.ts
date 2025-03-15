@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { InventoryItem, StockMovement, initialInventory, initialStockMovements } from './types';
 import { useToast } from '@/hooks/use-toast';
+import { exportToCSV } from '@/utils/exportUtils';
 
 export function useInventory() {
   const { toast } = useToast();
@@ -136,15 +137,39 @@ export function useInventory() {
   const handleExportInventory = () => {
     toast({
       title: "Export Started",
-      description: "Inventory data is being exported as an Excel file.",
+      description: "Inventory data is being prepared for download.",
     });
     
-    setTimeout(() => {
+    try {
+      // Format data for export if needed
+      const dataToExport = inventory.map(item => ({
+        ID: item.id,
+        'Product ID': item.productId,
+        'Product Name': item.productName,
+        SKU: item.sku,
+        Category: item.category,
+        'In Stock': item.inStock,
+        'Reorder Point': item.reorderPoint,
+        Status: item.status,
+        'Vendor Name': item.vendorName,
+        'Last Updated': item.lastUpdated
+      }));
+      
+      // Export data as CSV
+      exportToCSV(dataToExport, 'inventory_export');
+      
       toast({
         title: "Export Complete",
         description: "Inventory data has been exported successfully.",
       });
-    }, 1500);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the inventory data.",
+        variant: "destructive"
+      });
+    }
   };
 
   const uniqueCategories = Array.from(new Set(inventory.map(item => item.category)));
