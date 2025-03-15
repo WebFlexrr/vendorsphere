@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,9 @@ const BlogPostForm = ({ initialPost, onSave, onCancel }: BlogPostFormProps) => {
   const [excerpt, setExcerpt] = useState(initialPost?.excerpt || '');
   const [metaDescription, setMetaDescription] = useState(initialPost?.metaDescription || '');
   const [keywords, setKeywords] = useState(initialPost?.keywords || '');
-  const [status, setStatus] = useState(initialPost?.status || 'Draft');
+  const [status, setStatus] = useState<'Draft' | 'Published' | 'Scheduled'>(
+    initialPost?.status || 'Draft'
+  );
   const [category, setCategory] = useState(initialPost?.category || '');
   const [seoScoreFeedback, setSeoScoreFeedback] = useState({
     title: { score: 0, feedback: '' },
@@ -59,7 +60,6 @@ const BlogPostForm = ({ initialPost, onSave, onCancel }: BlogPostFormProps) => {
   }, [title, metaDescription, keywords, content]);
 
   const updateSeoScores = () => {
-    // Simple SEO scoring logic - this would be more sophisticated in a real implementation
     const titleScore = title.length > 10 && title.length < 70 ? 100 : 50;
     const descScore = metaDescription.length > 120 && metaDescription.length < 160 ? 100 : 60;
     const keywordsScore = keywords.split(',').length >= 3 ? 90 : 70;
@@ -97,10 +97,16 @@ const BlogPostForm = ({ initialPost, onSave, onCancel }: BlogPostFormProps) => {
       content,
       metaDescription,
       keywords,
-      status: status as BlogPost['status'],
+      status,
       category,
       seoScore: calculateOverallSeoScore()
     });
+  };
+
+  const handleStatusChange = (value: string) => {
+    if (value === 'Draft' || value === 'Published' || value === 'Scheduled') {
+      setStatus(value);
+    }
   };
 
   return (
@@ -146,7 +152,7 @@ const BlogPostForm = ({ initialPost, onSave, onCancel }: BlogPostFormProps) => {
           
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={handleStatusChange}>
               <SelectTrigger id="status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
