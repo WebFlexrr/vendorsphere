@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, ChevronRight, BarChart, Megaphone, 
-  FileText, UserCircle, LayoutTemplate, User
+  FileText, UserCircle, LayoutTemplate, User, Bell
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <span className="text-lg md:text-xl font-bold text-vsphere-primary">Vendor<span className="text-vsphere-dark">Sphere</span> <span className="hidden sm:inline text-gray-600 font-normal ml-2">Admin</span></span>
           </a>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          <Link to="/admin/notifications">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </Button>
+          </Link>
           <UserProfileDropdown />
         </div>
       </header>
@@ -159,6 +166,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 label="CMS" 
                 href="/admin/cms" 
                 active={location.pathname === '/admin/cms'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={Bell} 
+                label="Notifications" 
+                href="/admin/notifications" 
+                active={location.pathname === '/admin/notifications'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
