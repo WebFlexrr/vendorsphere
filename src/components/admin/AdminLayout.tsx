@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, LayoutDashboard, Package, Users, ShoppingCart, 
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useLocation, Link } from 'react-router-dom';
 import UserProfileDropdown from '@/components/admin/UserProfileDropdown';
+import ChatPanel from '@/components/admin/ChatPanel';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -191,6 +191,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           </main>
         </div>
       </div>
+
+      {/* Add ChatPanel Component */}
+      <ChatPanel />
     </div>
   );
 };
