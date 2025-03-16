@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Menu, X, LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, ChevronRight, BarChart, Megaphone, 
-  FileText, UserCircle
+  FileText, UserCircle, LayoutTemplate, User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -127,6 +127,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
+                icon={User} 
+                label="Users" 
+                href="/admin/users" 
+                active={location.pathname === '/admin/users'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
                 icon={BarChart} 
                 label="Analytics" 
                 href="/admin/analytics" 
@@ -145,6 +152,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 label="Blog" 
                 href="/admin/blog" 
                 active={location.pathname === '/admin/blog'} 
+                collapsed={!sidebarOpen} 
+              />
+              <SidebarItem 
+                icon={LayoutTemplate} 
+                label="CMS" 
+                href="/admin/cms" 
+                active={location.pathname === '/admin/cms'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
