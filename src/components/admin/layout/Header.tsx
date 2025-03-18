@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, toggleSidebar }) => {
         </a>
       </div>
       <div className="flex items-center gap-2">
-        <Link to="/admin/notifications">
+        <Link to="/notifications">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
