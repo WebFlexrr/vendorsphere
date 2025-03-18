@@ -25,8 +25,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       className={cn(
         "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
         active 
-          ? "bg-vsphere-primary/10 text-vsphere-primary" 
-          : "text-gray-700 hover:bg-gray-100 hover:text-vsphere-primary"
+          ? "bg-vsphere-primary/10 text-vsphere-primary dark:bg-vsphere-primary/20 dark:text-vsphere-primary" 
+          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-vsphere-primary dark:hover:text-vsphere-primary"
       )}
     >
       <Icon className="h-5 w-5 flex-shrink-0" />

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,20 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./components/admin/AdminDashboard";
-import ProductManagement from "./components/admin/ProductManagement";
-import OrderManagement from "./components/admin/OrderManagement";
-import Analytics from "./components/admin/Analytics";
-import VendorManagement from "./components/admin/VendorManagement";
-import Marketing from "./components/admin/Marketing";
-import Settings from "./components/admin/Settings";
-import BlogManagement from "./components/admin/BlogManagement";
-import EmployeeManagement from "./components/admin/EmployeeManagement";
-import InventoryManagement from "./components/admin/InventoryManagement";
-import UserManagement from "./components/admin/UserManagement";
-import CMSManagement from "./components/admin/CMSManagement";
-import Notifications from "./components/admin/Notifications";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -28,173 +13,148 @@ import Unauthorized from "./pages/Unauthorized";
 import UserProfile from "./pages/UserProfile";
 import { AuthProvider } from "./hooks/useAuth";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { ThemeProvider } from "./providers/ThemeProvider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-            
-            {/* Customer-facing routes */}
-            <Route path="/landingpage" element={<Index />} />
-            
-            {/* Protected admin routes */}
-            <Route 
-              path="/" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <AdminDashboard />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <UserProfile />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/products" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <ProductManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/orders" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <OrderManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/analytics" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminLayout>
-                    <Analytics />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/vendors" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <VendorManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/marketing" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'employee']}>
-                  <AdminLayout>
-                    <Marketing />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <Settings />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/blog" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <BlogManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employees" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminLayout>
-                    <EmployeeManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/inventory" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <InventoryManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/users" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'employee']}>
-                  <AdminLayout>
-                    <UserManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/cms" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <CMSManagement />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/notifications" 
-              element={
-                <ProtectedRoute>
-                  <AdminLayout>
-                    <Notifications />
-                  </AdminLayout>
-                </ProtectedRoute>
-              } 
-            />
+      <ThemeProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              {/* Customer-facing routes */}
+              <Route path="/landingpage" element={<Index />} />
+              
+              {/* Protected admin routes */}
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/products" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/orders" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/analytics" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/vendors" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/marketing" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/blog" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/employees" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/inventory" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/users" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/cms" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/notifications" 
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                } 
+              />
 
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

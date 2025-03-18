@@ -47,16 +47,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Admin header */}
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Admin header - fixed at top */}
       <Header sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div className="flex">
-        {/* Sidebar */}
+      <div className="flex pt-[3.5rem] md:pt-[4rem]">
+        {/* Sidebar - fixed position */}
         <Sidebar sidebarOpen={sidebarOpen} />
 
-        {/* Main content - add overlay for mobile */}
-        <div className="relative flex-1">
+        {/* Main content - scrollable */}
+        <div className="relative flex-1 min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-4rem)]">
           {/* Mobile overlay */}
           {sidebarOpen && (
             <div 
@@ -65,7 +65,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             ></div>
           )}
           
-          <main className="p-4 md:p-6 overflow-auto">
+          <main className="p-4 md:p-6 overflow-auto h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)]">
             {children}
           </main>
         </div>

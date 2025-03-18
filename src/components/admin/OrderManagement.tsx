@@ -1,397 +1,547 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Search, Filter, ArrowUpDown, Eye, ShoppingCart, Truck, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Search, Filter, Eye, Package, TruckIcon, Printer } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DownloadCSVButton from './DownloadCSVButton';
 
-type Order = {
-  id: string;
-  customer: string;
-  date: string;
-  total: number;
-  items: number;
-  status: string;
-  payment: string;
-  address?: string;
-  email?: string;
-  phone?: string;
-  products?: { name: string; price: number; quantity: number }[];
+// Sample orders data
+const orders = [
+  {
+    id: "ORD-001",
+    customer: "John Doe",
+    date: "2023-06-05",
+    items: 3,
+    total: 149.97,
+    status: "Delivered",
+    payment: "Paid",
+    address: "123 Main St, New York, NY 10001"
+  },
+  {
+    id: "ORD-002",
+    customer: "Jane Smith",
+    date: "2023-06-05",
+    items: 2,
+    total: 74.98,
+    status: "Processing",
+    payment: "Paid",
+    address: "456 Park Ave, Los Angeles, CA 90001"
+  },
+  {
+    id: "ORD-003",
+    customer: "Robert Johnson",
+    date: "2023-06-04",
+    items: 5,
+    total: 236.95,
+    status: "Shipped",
+    payment: "Paid",
+    address: "789 Oak St, Chicago, IL 60007"
+  },
+  {
+    id: "ORD-004",
+    customer: "Sarah Williams",
+    date: "2023-06-04",
+    items: 1,
+    total: 49.99,
+    status: "Delivered",
+    payment: "Paid",
+    address: "101 Pine St, Miami, FL 33101"
+  },
+  {
+    id: "ORD-005",
+    customer: "Michael Brown",
+    date: "2023-06-03",
+    items: 4,
+    total: 157.96,
+    status: "Delivered",
+    payment: "Paid",
+    address: "202 Maple Ave, Seattle, WA 98101"
+  },
+  {
+    id: "ORD-006",
+    customer: "Emily Davis",
+    date: "2023-06-03",
+    items: 2,
+    total: 89.98,
+    status: "Processing",
+    payment: "Pending",
+    address: "303 Cedar Rd, Dallas, TX 75001"
+  },
+  {
+    id: "ORD-007",
+    customer: "David Wilson",
+    date: "2023-06-02",
+    items: 6,
+    total: 312.94,
+    status: "Shipped",
+    payment: "Paid",
+    address: "404 Birch Ln, Boston, MA 02101"
+  },
+  {
+    id: "ORD-008",
+    customer: "Lisa Martinez",
+    date: "2023-06-02",
+    items: 3,
+    total: 144.97,
+    status: "Cancelled",
+    payment: "Refunded",
+    address: "505 Elm St, Denver, CO 80201"
+  },
+  {
+    id: "ORD-009",
+    customer: "James Taylor",
+    date: "2023-06-01",
+    items: 1,
+    total: 29.99,
+    status: "Delivered",
+    payment: "Paid",
+    address: "606 Walnut Ave, Phoenix, AZ 85001"
+  },
+  {
+    id: "ORD-010",
+    customer: "Patricia Anderson",
+    date: "2023-06-01",
+    items: 4,
+    total: 199.96,
+    status: "Shipped",
+    payment: "Paid",
+    address: "707 Spruce Blvd, Philadelphia, PA 19019"
+  }
+];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Delivered':
+      return 'bg-green-500 dark:bg-green-700';
+    case 'Shipped':
+      return 'bg-blue-500 dark:bg-blue-700';
+    case 'Processing':
+      return 'bg-orange-500 dark:bg-orange-700';
+    case 'Cancelled':
+      return 'bg-red-500 dark:bg-red-700';
+    default:
+      return 'bg-gray-500 dark:bg-gray-700';
+  }
 };
 
 const OrderManagement = () => {
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-  
-  // Mock order data
-  const [orders, setOrders] = useState<Order[]>([
-    { 
-      id: 'ORD-7452', 
-      customer: 'John Doe', 
-      date: '2023-06-18', 
-      total: 124.95, 
-      items: 3, 
-      status: 'Delivered', 
-      payment: 'Paid',
-      address: '123 Main St, Anytown, CA 94582',
-      email: 'john.doe@example.com',
-      phone: '(555) 123-4567',
-      products: [
-        { name: 'Artisan Coffee Mug', price: 24.99, quantity: 2 },
-        { name: 'Leather Wallet', price: 74.97, quantity: 1 }
-      ]
-    },
-    { id: 'ORD-7451', customer: 'Jane Smith', date: '2023-06-17', total: 89.99, items: 1, status: 'Shipped', payment: 'Paid' },
-    { id: 'ORD-7450', customer: 'Bob Johnson', date: '2023-06-17', total: 54.25, items: 2, status: 'Processing', payment: 'Paid' },
-    { id: 'ORD-7449', customer: 'Sarah Williams', date: '2023-06-16', total: 210.50, items: 4, status: 'Pending', payment: 'Awaiting' },
-    { id: 'ORD-7448', customer: 'Mike Brown', date: '2023-06-15', total: 45.00, items: 1, status: 'Cancelled', payment: 'Refunded' },
-  ]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Delivered': return 'bg-green-100 text-green-700';
-      case 'Shipped': return 'bg-blue-100 text-blue-700';
-      case 'Processing': return 'bg-yellow-100 text-yellow-700';
-      case 'Pending': return 'bg-gray-100 text-gray-700';
-      case 'Cancelled': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Delivered': return <CheckCircle className="h-4 w-4 mr-1" />;
-      case 'Shipped': return <Truck className="h-4 w-4 mr-1" />;
-      case 'Processing': return <ShoppingCart className="h-4 w-4 mr-1" />;
-      case 'Pending': return <Clock className="h-4 w-4 mr-1" />;
-      case 'Cancelled': return <XCircle className="h-4 w-4 mr-1" />;
-      default: return null;
-    }
-  };
-
-  // Filter orders based on search query and tab
-  const filteredOrders = (tab: string) => {
-    let filtered = orders;
-    
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(order => 
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customer.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    // Apply tab filter
-    if (tab !== 'all') {
-      const statusMap: Record<string, string> = {
-        'pending': 'Pending',
-        'processing': 'Processing',
-        'shipped': 'Shipped',
-        'delivered': 'Delivered',
-        'cancelled': 'Cancelled'
-      };
-      filtered = filtered.filter(order => order.status === statusMap[tab]);
-    }
-    
-    return filtered;
-  };
-
-  const handleViewOrder = (order: Order) => {
-    setCurrentOrder(order);
-    setIsViewModalOpen(true);
-  };
-  
-  const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-    
-    toast({
-      title: "Order Status Updated",
-      description: `Order ${orderId} has been updated to ${newStatus}.`,
-    });
-    
-    if (isViewModalOpen && currentOrder?.id === orderId) {
-      setCurrentOrder({ ...currentOrder, status: newStatus });
-    }
-  };
-
-  const renderOrdersTable = (tabValue: string) => {
-    const filtered = filteredOrders(tabValue);
-    
-    return (
-      <>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="py-3 text-left">Order ID</th>
-                <th className="py-3 text-left">Customer</th>
-                <th className="py-3 text-left">Date</th>
-                <th className="py-3 text-right">Total</th>
-                <th className="py-3 text-center">Items</th>
-                <th className="py-3 text-center">Status</th>
-                <th className="py-3 text-center">Payment</th>
-                <th className="py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-4 text-center text-gray-500">
-                    No orders found matching your criteria.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((order) => (
-                  <tr key={order.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3">{order.id}</td>
-                    <td className="py-3">{order.customer}</td>
-                    <td className="py-3">{order.date}</td>
-                    <td className="py-3 text-right">${order.total.toFixed(2)}</td>
-                    <td className="py-3 text-center">{order.items}</td>
-                    <td className="py-3 text-center">
-                      <Badge className={getStatusColor(order.status)}>
-                        <span className="flex items-center">
-                          {getStatusIcon(order.status)}
-                          {order.status}
-                        </span>
-                      </Badge>
-                    </td>
-                    <td className="py-3 text-center">
-                      <Badge variant="outline" className={
-                        order.payment === 'Paid' ? 'bg-green-50 text-green-700' : 
-                        order.payment === 'Awaiting' ? 'bg-yellow-50 text-yellow-700' : 
-                        'bg-red-50 text-red-700'
-                      }>
-                        {order.payment}
-                      </Badge>
-                    </td>
-                    <td className="py-3 flex justify-end">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => handleViewOrder(order)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </>
-    );
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Order Management</h1>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-vsphere-light text-vsphere-dark">
-            Today: {new Date().toLocaleDateString()}
-          </Badge>
+          <DownloadCSVButton 
+            data={orders} 
+            filename="orders-list" 
+            label="Export Orders"
+          />
+          <Button variant="outline">
+            <Printer className="mr-2 h-4 w-4" /> Print Orders
+          </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="all">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <TabsList className="grid w-full sm:w-auto grid-cols-5 sm:grid-cols-6">
-            <TabsTrigger value="all">All Orders</TabsTrigger>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="processing">Processing</TabsTrigger>
-            <TabsTrigger value="shipped">Shipped</TabsTrigger>
-            <TabsTrigger value="delivered">Delivered</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          </TabsList>
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search orders..."
-              className="pl-10 pr-4 py-2 border rounded-md w-full sm:w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <Input
+            type="search"
+            placeholder="Search orders..."
+            className="pl-8"
+          />
         </div>
+        <Button variant="outline">
+          <Filter className="mr-2 h-4 w-4" />
+          Filters
+        </Button>
+      </div>
 
-        <TabsContent value="all" className="mt-0">
+      <Tabs defaultValue="all-orders">
+        <TabsList>
+          <TabsTrigger value="all-orders">All Orders</TabsTrigger>
+          <TabsTrigger value="processing">Processing</TabsTrigger>
+          <TabsTrigger value="shipped">Shipped</TabsTrigger>
+          <TabsTrigger value="delivered">Delivered</TabsTrigger>
+          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+        </TabsList>
+        <TabsContent value="all-orders">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex justify-between items-center">
-                <span>All Orders ({filteredOrders('all').length})</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <Filter className="h-3.5 w-3.5 mr-2" /> Filter
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <ArrowUpDown className="h-3.5 w-3.5 mr-2" /> Sort
-                  </Button>
-                </div>
+            <CardHeader className="px-6">
+              <CardTitle className="flex items-center text-lg">
+                <Package className="mr-2 h-5 w-5" />
+                All Orders
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {renderOrdersTable('all')}
+            <CardContent className="px-0">
+              <ScrollArea className="h-[calc(100vh-280px)]">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">
+                          {order.id}
+                        </TableCell>
+                        <TableCell>{order.customer}</TableCell>
+                        <TableCell>{order.date}</TableCell>
+                        <TableCell className="text-right">{order.items}</TableCell>
+                        <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                            <span>{order.status}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              order.payment === 'Paid' 
+                                ? 'default' 
+                                : order.payment === 'Pending' 
+                                  ? 'outline' 
+                                  : 'secondary'
+                            }
+                          >
+                            {order.payment}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-1">
+                            <Button variant="ghost" size="icon">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <TruckIcon className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
             </CardContent>
           </Card>
         </TabsContent>
-        
-        {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map((tab) => (
-          <TabsContent key={tab} value={tab}>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)} Orders ({filteredOrders(tab).length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {renderOrdersTable(tab)}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
+        <TabsContent value="processing">
+          <Card>
+            <CardHeader className="px-6">
+              <CardTitle className="flex items-center text-lg">
+                <Package className="mr-2 h-5 w-5" />
+                Processing Orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-0">
+              <ScrollArea className="h-[calc(100vh-280px)]">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders
+                      .filter((order) => order.status === "Processing")
+                      .map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.id}
+                          </TableCell>
+                          <TableCell>{order.customer}</TableCell>
+                          <TableCell>{order.date}</TableCell>
+                          <TableCell className="text-right">{order.items}</TableCell>
+                          <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                              <span>{order.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.payment === "Paid"
+                                  ? "default"
+                                  : order.payment === "Pending"
+                                    ? "outline"
+                                    : "secondary"
+                              }
+                            >
+                              {order.payment}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-1">
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <TruckIcon className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="shipped">
+          <Card>
+            <CardHeader className="px-6">
+              <CardTitle className="flex items-center text-lg">
+                <Package className="mr-2 h-5 w-5" />
+                Shipped Orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-0">
+              <ScrollArea className="h-[calc(100vh-280px)]">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders
+                      .filter((order) => order.status === "Shipped")
+                      .map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.id}
+                          </TableCell>
+                          <TableCell>{order.customer}</TableCell>
+                          <TableCell>{order.date}</TableCell>
+                          <TableCell className="text-right">{order.items}</TableCell>
+                          <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                              <span>{order.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.payment === "Paid"
+                                  ? "default"
+                                  : order.payment === "Pending"
+                                    ? "outline"
+                                    : "secondary"
+                              }
+                            >
+                              {order.payment}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-1">
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <TruckIcon className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="delivered">
+          <Card>
+            <CardHeader className="px-6">
+              <CardTitle className="flex items-center text-lg">
+                <Package className="mr-2 h-5 w-5" />
+                Delivered Orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-0">
+              <ScrollArea className="h-[calc(100vh-280px)]">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders
+                      .filter((order) => order.status === "Delivered")
+                      .map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.id}
+                          </TableCell>
+                          <TableCell>{order.customer}</TableCell>
+                          <TableCell>{order.date}</TableCell>
+                          <TableCell className="text-right">{order.items}</TableCell>
+                          <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                              <span>{order.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.payment === "Paid"
+                                  ? "default"
+                                  : order.payment === "Pending"
+                                    ? "outline"
+                                    : "secondary"
+                              }
+                            >
+                              {order.payment}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-1">
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <TruckIcon className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="cancelled">
+          <Card>
+            <CardHeader className="px-6">
+              <CardTitle className="flex items-center text-lg">
+                <Package className="mr-2 h-5 w-5" />
+                Cancelled Orders
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-0">
+              <ScrollArea className="h-[calc(100vh-280px)]">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders
+                      .filter((order) => order.status === "Cancelled")
+                      .map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.id}
+                          </TableCell>
+                          <TableCell>{order.customer}</TableCell>
+                          <TableCell>{order.date}</TableCell>
+                          <TableCell className="text-right">{order.items}</TableCell>
+                          <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${getStatusColor(order.status)}`}></div>
+                              <span>{order.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                order.payment === "Paid"
+                                  ? "default"
+                                  : order.payment === "Pending"
+                                    ? "outline"
+                                    : "secondary"
+                              }
+                            >
+                              {order.payment}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-1">
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <TruckIcon className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
-      
-      {/* Order Detail Modal */}
-      {isViewModalOpen && currentOrder && (
-        <Dialog open={isViewModalOpen} onOpenChange={() => setIsViewModalOpen(false)}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                Order Details
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="grid gap-4 py-4">
-              <div className="flex justify-between border-b pb-3">
-                <span className="font-medium">Order ID:</span>
-                <span>{currentOrder.id}</span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span className="font-medium">Customer:</span>
-                <span>{currentOrder.customer}</span>
-              </div>
-              
-              {currentOrder.email && (
-                <div className="flex justify-between">
-                  <span className="font-medium">Email:</span>
-                  <span>{currentOrder.email}</span>
-                </div>
-              )}
-              
-              {currentOrder.phone && (
-                <div className="flex justify-between">
-                  <span className="font-medium">Phone:</span>
-                  <span>{currentOrder.phone}</span>
-                </div>
-              )}
-              
-              {currentOrder.address && (
-                <div className="flex justify-between">
-                  <span className="font-medium">Address:</span>
-                  <span>{currentOrder.address}</span>
-                </div>
-              )}
-              
-              <div className="flex justify-between">
-                <span className="font-medium">Order Date:</span>
-                <span>{currentOrder.date}</span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span className="font-medium">Payment Status:</span>
-                <Badge variant="outline" className={
-                  currentOrder.payment === 'Paid' ? 'bg-green-50 text-green-700' : 
-                  currentOrder.payment === 'Awaiting' ? 'bg-yellow-50 text-yellow-700' : 
-                  'bg-red-50 text-red-700'
-                }>
-                  {currentOrder.payment}
-                </Badge>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Order Status:</span>
-                <div className="flex items-center gap-2">
-                  <Select 
-                    defaultValue={currentOrder.status}
-                    onValueChange={(value) => handleUpdateOrderStatus(currentOrder.id, value)}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Processing">Processing</SelectItem>
-                      <SelectItem value="Shipped">Shipped</SelectItem>
-                      <SelectItem value="Delivered">Delivered</SelectItem>
-                      <SelectItem value="Cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {currentOrder.products && (
-                <>
-                  <div className="font-medium mt-2">Products:</div>
-                  <div className="border rounded-md">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b bg-gray-50">
-                          <th className="px-4 py-2 text-left">Product</th>
-                          <th className="px-4 py-2 text-right">Price</th>
-                          <th className="px-4 py-2 text-center">Quantity</th>
-                          <th className="px-4 py-2 text-right">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentOrder.products.map((product, index) => (
-                          <tr key={index} className={index !== currentOrder.products!.length - 1 ? "border-b" : ""}>
-                            <td className="px-4 py-2">{product.name}</td>
-                            <td className="px-4 py-2 text-right">${product.price.toFixed(2)}</td>
-                            <td className="px-4 py-2 text-center">{product.quantity}</td>
-                            <td className="px-4 py-2 text-right">${(product.price * product.quantity).toFixed(2)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot className="border-t">
-                        <tr>
-                          <td colSpan={3} className="px-4 py-2 text-right font-medium">Order Total:</td>
-                          <td className="px-4 py-2 text-right font-medium">${currentOrder.total.toFixed(2)}</td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            <DialogFooter className="flex justify-end">
-              <Button 
-                variant="outline"
-                onClick={() => setIsViewModalOpen(false)}
-              >
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
