@@ -94,92 +94,92 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <SidebarItem 
                 icon={LayoutDashboard} 
                 label="Dashboard" 
-                active={location.pathname === '/admin'} 
-                href="/admin" 
+                active={location.pathname === '/'} 
+                href="/" 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Package} 
                 label="Products" 
-                href="/admin/products" 
-                active={location.pathname === '/admin/products'} 
+                href="/products" 
+                active={location.pathname === '/products'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Users} 
                 label="Vendors" 
-                href="/admin/vendors" 
-                active={location.pathname === '/admin/vendors'} 
+                href="/vendors" 
+                active={location.pathname === '/vendors'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={ShoppingCart} 
                 label="Orders" 
-                href="/admin/orders" 
-                active={location.pathname === '/admin/orders'} 
+                href="/orders" 
+                active={location.pathname === '/orders'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Package} 
                 label="Inventory" 
-                href="/admin/inventory" 
-                active={location.pathname === '/admin/inventory'} 
+                href="/inventory" 
+                active={location.pathname === '/inventory'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={UserCircle} 
                 label="Employees" 
-                href="/admin/employees" 
-                active={location.pathname === '/admin/employees'} 
+                href="/employees" 
+                active={location.pathname === '/employees'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={User} 
                 label="Users" 
-                href="/admin/users" 
-                active={location.pathname === '/admin/users'} 
+                href="/users" 
+                active={location.pathname === '/users'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={BarChart} 
                 label="Analytics" 
-                href="/admin/analytics" 
-                active={location.pathname === '/admin/analytics'} 
+                href="/analytics" 
+                active={location.pathname === '/analytics'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Megaphone} 
                 label="Marketing" 
-                href="/admin/marketing" 
-                active={location.pathname === '/admin/marketing'} 
+                href="/marketing" 
+                active={location.pathname === '/marketing'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={FileText} 
                 label="Blog" 
-                href="/admin/blog" 
-                active={location.pathname === '/admin/blog'} 
+                href="/blog" 
+                active={location.pathname === '/blog'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={LayoutTemplate} 
                 label="CMS" 
-                href="/admin/cms" 
-                active={location.pathname === '/admin/cms'} 
+                href="/cms" 
+                active={location.pathname === '/cms'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Bell} 
                 label="Notifications" 
-                href="/admin/notifications" 
-                active={location.pathname === '/admin/notifications'} 
+                href="/notifications" 
+                active={location.pathname === '/notifications'} 
                 collapsed={!sidebarOpen} 
               />
               <SidebarItem 
                 icon={Settings} 
                 label="Settings" 
-                href="/admin/settings" 
-                active={location.pathname === '/admin/settings'} 
+                href="/settings" 
+                active={location.pathname === '/settings'} 
                 collapsed={!sidebarOpen} 
               />
             </nav>
