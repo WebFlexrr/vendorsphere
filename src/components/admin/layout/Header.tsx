@@ -12,7 +12,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ sidebarOpen, toggleSidebar }) => {
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm py-3 px-4 md:py-4 md:px-6 flex items-center justify-between fixed top-0 w-full z-20">
+    <header className="bg-white shadow-sm py-3 px-4 md:py-4 md:px-6 flex items-center justify-between sticky top-0 z-20">
       <div className="flex items-center">
         <Button 
           variant="ghost" 
@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, toggleSidebar }) => {
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
         <a href="/admin" className="flex items-center">
-          <span className="text-lg md:text-xl font-bold text-vsphere-primary">Vendor<span className="text-vsphere-dark dark:text-white">Sphere</span> <span className="hidden sm:inline text-gray-600 dark:text-gray-400 font-normal ml-2">Admin</span></span>
+          <span className="text-lg md:text-xl font-bold text-vsphere-primary">Vendor<span className="text-vsphere-dark">Sphere</span> <span className="hidden sm:inline text-gray-600 font-normal ml-2">Admin</span></span>
         </a>
       </div>
       <div className="flex items-center gap-2">
