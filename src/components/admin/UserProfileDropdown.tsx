@@ -14,19 +14,12 @@ import { Settings, User, LogOut, Bell, Moon, Sun } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const UserProfileDropdown = () => {
   const { toast } = useToast();
   const { user, logout } = useAuth();
-  const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-    toast({
-      title: `Switched to ${theme === 'light' ? 'dark' : 'light'} mode`,
-      description: "Your preference has been saved."
-    });
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -36,7 +29,7 @@ const UserProfileDropdown = () => {
             <AvatarImage src={user?.avatar || "/placeholder.svg"} alt="User" />
             <AvatarFallback>{user?.name?.slice(0, 2).toUpperCase() || "UR"}</AvatarFallback>
           </Avatar>
-          <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
+          <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800"></span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
