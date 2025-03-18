@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,6 +21,13 @@ import InventoryManagement from "./components/admin/InventoryManagement";
 import UserManagement from "./components/admin/UserManagement";
 import CMSManagement from "./components/admin/CMSManagement";
 import Notifications from "./components/admin/Notifications";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import Unauthorized from "./pages/Unauthorized";
+import UserProfile from "./pages/UserProfile";
+import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -29,29 +37,163 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AdminLayout>
+        <AuthProvider>
           <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            {/* Customer-facing routes */}
             <Route path="/landingpage" element={<Index />} />
+            
+            {/* Protected admin routes */}
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <AdminDashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <UserProfile />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/products" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <ProductManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/orders" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <OrderManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminLayout>
+                    <Analytics />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/vendors" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <VendorManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/marketing" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                  <AdminLayout>
+                    <Marketing />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Settings />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/blog" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <BlogManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/employees" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminLayout>
+                    <EmployeeManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/inventory" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <InventoryManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/users" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                  <AdminLayout>
+                    <UserManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/cms" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <CMSManagement />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/notifications" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Notifications />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } 
+            />
 
-            {/* <Route path="/*" element={<Admin />} /> */}
-            <Route path="/" element={<AdminDashboard />} />
-            <Route path="/products" element={<ProductManagement />} />
-            <Route path="/orders" element={<OrderManagement />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/vendors" element={<VendorManagement />} />
-            <Route path="/marketing" element={<Marketing />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/blog" element={<BlogManagement />} />
-            <Route path="/employees" element={<EmployeeManagement />} />
-            <Route path="/inventory" element={<InventoryManagement />} />
-            <Route path="/users" element={<UserManagement />} />
-            <Route path="/cms" element={<CMSManagement />} />
-            <Route path="/notifications" element={<Notifications />} />
-
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AdminLayout>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

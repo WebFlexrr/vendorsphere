@@ -12,9 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Settings, User, LogOut, Bell, Moon, Sun } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 const UserProfileDropdown = () => {
   const { toast } = useToast();
+  const { user, logout } = useAuth();
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
 
   const toggleTheme = () => {
@@ -25,20 +28,13 @@ const UserProfileDropdown = () => {
     });
   };
 
-  const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out."
-    });
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/placeholder.svg" alt="User" />
-            <AvatarFallback>UR</AvatarFallback>
+            <AvatarImage src={user?.avatar || "/placeholder.svg"} alt="User" />
+            <AvatarFallback>{user?.name?.slice(0, 2).toUpperCase() || "UR"}</AvatarFallback>
           </Avatar>
           <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></span>
         </Button>
@@ -46,22 +42,28 @@ const UserProfileDropdown = () => {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">Admin User</p>
-            <p className="text-xs text-muted-foreground">admin@example.com</p>
+            <p className="text-sm font-medium">{user?.name || "User"}</p>
+            <p className="text-xs text-muted-foreground">{user?.email || "user@example.com"}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Bell className="mr-2 h-4 w-4" />
-          <span>Notifications</span>
+        <DropdownMenuItem asChild>
+          <Link to="/notifications" className="cursor-pointer">
+            <Bell className="mr-2 h-4 w-4" />
+            <span>Notifications</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={toggleTheme}>
           {theme === 'light' ? (
@@ -77,7 +79,7 @@ const UserProfileDropdown = () => {
           )}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
