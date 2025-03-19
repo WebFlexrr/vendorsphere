@@ -1,341 +1,244 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Package, Search, Plus, Filter, Eye, Edit, Trash, Download } from 'lucide-react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import ProductModal from './ProductModal';
-import DownloadCSVButton from './DownloadCSVButton';
-
-// Sample product data
-const products = [
-  {
-    id: 'PROD-001',
-    name: 'Wireless Earbuds',
-    category: 'Electronics',
-    vendor: 'TechAudio Inc.',
-    price: 79.99,
-    stock: 156,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-002',
-    name: 'Smart Watch Pro',
-    category: 'Electronics',
-    vendor: 'TimeTech',
-    price: 199.99,
-    stock: 42,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-003',
-    name: 'Organic Shampoo',
-    category: 'Beauty',
-    vendor: 'Natural Essentials',
-    price: 12.99,
-    stock: 230,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-004',
-    name: 'Cotton T-Shirt',
-    category: 'Apparel',
-    vendor: 'Fashion Basics',
-    price: 24.99,
-    stock: 189,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-005',
-    name: 'Fitness Tracker',
-    category: 'Electronics',
-    vendor: 'FitTech',
-    price: 49.99,
-    stock: 78,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-006',
-    name: 'Coffee Maker',
-    category: 'Home',
-    vendor: 'Kitchen Essentials',
-    price: 89.99,
-    stock: 32,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-007',
-    name: 'Bluetooth Speaker',
-    category: 'Electronics',
-    vendor: 'SoundWave',
-    price: 59.99,
-    stock: 65,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-008',
-    name: 'Yoga Mat',
-    category: 'Fitness',
-    vendor: 'Wellness Co.',
-    price: 29.99,
-    stock: 110,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-009',
-    name: 'Leather Wallet',
-    category: 'Accessories',
-    vendor: 'LeatherCraft',
-    price: 39.99,
-    stock: 85,
-    status: 'Active',
-  },
-  {
-    id: 'PROD-010',
-    name: 'Smart Bulb',
-    category: 'Home',
-    vendor: 'SmartLiving',
-    price: 19.99,
-    stock: 0,
-    status: 'Out of Stock',
-  },
-];
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Package, Search, Plus, Edit, Trash2, Filter, ArrowUpDown } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import ProductModal, { Product } from './ProductModal';
+import { Input } from '@/components/ui/input';
 
 const ProductManagement = () => {
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  
+  // Mock product data
+  const [products, setProducts] = useState<Product[]>([
+    { id: 1, name: 'Artisan Coffee Mug', category: 'Home', vendor: 'Artisan Crafts', price: 24.99, stock: 45, status: 'Active' },
+    { id: 2, name: 'Wireless Earbuds Pro', category: 'Electronics', vendor: 'Tech Universe', price: 79.99, stock: 12, status: 'Active' },
+    { id: 3, name: 'Leather Wallet', category: 'Fashion', vendor: 'Fashion Forward', price: 49.99, stock: 28, status: 'Active' },
+    { id: 4, name: 'Scented Candle Set', category: 'Home', vendor: 'Home Elegance', price: 34.99, stock: 0, status: 'Out of stock' },
+    { id: 5, name: 'Facial Serum', category: 'Beauty', vendor: 'Beauty Essentials', price: 29.99, stock: 5, status: 'Low stock' },
+  ]);
+
+  // Filter products based on search query and tab
+  const filteredProducts = (tab: string) => {
+    let filtered = products;
+    
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.vendor.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Apply tab filter
+    if (tab !== 'all') {
+      const statusMap: Record<string, string> = {
+        'active': 'Active',
+        'low': 'Low stock',
+        'out': 'Out of stock'
+      };
+      filtered = filtered.filter(product => product.status === statusMap[tab]);
+    }
+    
+    return filtered;
+  };
+
+  const handleAddProduct = () => {
+    setCurrentProduct(null);
+    setIsModalOpen(true);
+  };
+  
+  const handleEditProduct = (product: Product) => {
+    setCurrentProduct(product);
+    setIsModalOpen(true);
+  };
+  
+  const handleDeleteProduct = (productId: number) => {
+    const productToDelete = products.find(p => p.id === productId);
+    if (!productToDelete) return;
+    
+    setProducts(products.filter(p => p.id !== productId));
+    
+    toast({
+      title: "Product Deleted",
+      description: `${productToDelete.name} has been successfully removed.`,
+      variant: "destructive"
+    });
+  };
+  
+  const handleSaveProduct = (product: Product) => {
+    if (currentProduct) {
+      // Update existing product
+      setProducts(products.map(p => p.id === product.id ? product : p));
+    } else {
+      // Add new product
+      setProducts([...products, product]);
+    }
+  };
+
+  const renderProductsTable = (tabValue: string) => {
+    const filtered = filteredProducts(tabValue);
+    
+    return (
+      <>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="py-3 text-left">Product</th>
+                <th className="py-3 text-left">Category</th>
+                <th className="py-3 text-left">Vendor</th>
+                <th className="py-3 text-right">Price</th>
+                <th className="py-3 text-right">Stock</th>
+                <th className="py-3 text-center">Status</th>
+                <th className="py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-4 text-center text-gray-500">
+                    No products found matching your criteria.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((product) => (
+                  <tr key={product.id} className="border-b hover:bg-gray-50">
+                    <td className="py-3 flex items-center gap-2">
+                      <div className="bg-vsphere-light/50 p-1.5 rounded">
+                        <Package className="h-4 w-4 text-vsphere-primary" />
+                      </div>
+                      <span>{product.name}</span>
+                    </td>
+                    <td className="py-3">{product.category}</td>
+                    <td className="py-3">{product.vendor}</td>
+                    <td className="py-3 text-right">${product.price.toFixed(2)}</td>
+                    <td className="py-3 text-right">{product.stock}</td>
+                    <td className="py-3 text-center">
+                      <Badge className={`
+                        ${product.status === 'Active' ? 'bg-green-100 text-green-700' : ''}
+                        ${product.status === 'Low stock' ? 'bg-yellow-100 text-yellow-700' : ''}
+                        ${product.status === 'Out of stock' ? 'bg-red-100 text-red-700' : ''}
+                      `}>
+                        {product.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3 flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => handleEditProduct(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-red-500"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Product Management</h1>
-        <div className="flex items-center gap-2">
-          <DownloadCSVButton 
-            data={products} 
-            filename="product-inventory" 
-            label="Export Products"
-          />
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Product
-          </Button>
-        </div>
+        <Button 
+          className="bg-vsphere-primary text-white hover:bg-vsphere-primary/90"
+          onClick={handleAddProduct}
+        >
+          <Plus className="h-4 w-4 mr-2" /> Add New Product
+        </Button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 mb-4">
-        <div className="flex-1 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
+      <Tabs defaultValue="all">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <TabsList className="grid w-full sm:w-auto grid-cols-4 sm:grid-cols-4">
+            <TabsTrigger value="all">All Products</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="low">Low Stock</TabsTrigger>
+            <TabsTrigger value="out">Out of Stock</TabsTrigger>
+          </TabsList>
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              type="search"
+              type="text"
               placeholder="Search products..."
-              className="pl-8"
+              className="pl-10 pr-4 py-2 border rounded-md w-full sm:w-64"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filters
-          </Button>
         </div>
-        <ToggleGroup type="single" defaultValue="all">
-          <ToggleGroupItem value="all">All</ToggleGroupItem>
-          <ToggleGroupItem value="active">Active</ToggleGroupItem>
-          <ToggleGroupItem value="draft">Draft</ToggleGroupItem>
-          <ToggleGroupItem value="archived">Archived</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
 
-      <Tabs defaultValue="all-products">
-        <TabsList>
-          <TabsTrigger value="all-products">All Products</TabsTrigger>
-          <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
-          <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
-        </TabsList>
-        <TabsContent value="all-products">
+        <TabsContent value="all" className="mt-0">
           <Card>
-            <CardHeader className="px-6">
-              <CardTitle className="flex items-center text-lg">
-                <Package className="mr-2 h-5 w-5" />
-                All Products
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex justify-between items-center">
+                <span>All Products ({filteredProducts('all').length})</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Filter className="h-3.5 w-3.5 mr-2" /> Filter
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <ArrowUpDown className="h-3.5 w-3.5 mr-2" /> Sort
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-0">
-              <ScrollArea className="h-[calc(100vh-280px)]">
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Vendor</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                          {product.name}
-                        </TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>{product.vendor}</TableCell>
-                        <TableCell className="text-right">
-                          ${product.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">{product.stock}</TableCell>
-                        <TableCell>
-                          <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
-                            {product.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end space-x-1">
-                            <Button variant="ghost" size="icon">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
+            <CardContent>
+              {renderProductsTable('all')}
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="out-of-stock">
-          <Card>
-            <CardHeader className="px-6">
-              <CardTitle className="flex items-center text-lg">
-                <Package className="mr-2 h-5 w-5" />
-                Out of Stock Products
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-0">
-              <ScrollArea className="h-[calc(100vh-280px)]">
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Vendor</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products
-                      .filter((product) => product.status === 'Out of Stock')
-                      .map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">
-                            {product.name}
-                          </TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell>{product.vendor}</TableCell>
-                          <TableCell className="text-right">
-                            ${product.price.toFixed(2)}
-                          </TableCell>
-                          <TableCell className="text-right">{product.stock}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{product.status}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-1">
-                              <Button variant="ghost" size="icon">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="low-stock">
-          <Card>
-            <CardHeader className="px-6">
-              <CardTitle className="flex items-center text-lg">
-                <Package className="mr-2 h-5 w-5" />
-                Low Stock Products
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-0">
-              <ScrollArea className="h-[calc(100vh-280px)]">
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead>Product</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Vendor</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {products
-                      .filter((product) => product.stock < 50 && product.status !== 'Out of Stock')
-                      .map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">
-                            {product.name}
-                          </TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell>{product.vendor}</TableCell>
-                          <TableCell className="text-right">
-                            ${product.price.toFixed(2)}
-                          </TableCell>
-                          <TableCell className="text-right">{product.stock}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{product.status}</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end space-x-1">
-                              <Button variant="ghost" size="icon">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        
+        {['active', 'low', 'out'].map((tab) => (
+          <TabsContent key={tab} value={tab}>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex justify-between items-center">
+                  <span>
+                    {tab === 'active' ? 'Active' : tab === 'low' ? 'Low Stock' : 'Out of Stock'} 
+                    Products ({filteredProducts(tab).length})
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {renderProductsTable(tab)}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
       </Tabs>
-
-      <ProductModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+      
+      {isModalOpen && (
+        <ProductModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          product={currentProduct}
+          onSave={handleSaveProduct}
+        />
+      )}
     </div>
   );
 };

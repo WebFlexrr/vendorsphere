@@ -20,11 +20,11 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   return (
     <aside 
       className={cn(
-        "bg-white dark:bg-gray-800 fixed h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] shadow-md transition-all duration-300 z-10 top-[3.5rem] md:top-[4rem]",
+        "bg-white fixed md:static h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] shadow-md transition-all duration-300 z-10",
         sidebarOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 md:w-16 overflow-hidden"
       )}
     >
-      <div className="p-3 md:p-4 h-full overflow-y-auto">
+      <div className="p-3 md:p-4">
         <nav className="space-y-1">
           <SidebarItem 
             icon={LayoutDashboard} 
@@ -119,7 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
           />
         </nav>
 
-        <Separator className="my-3 md:my-4 dark:bg-gray-700" />
+        <Separator className="my-3 md:my-4" />
         
         <SidebarItem icon={LogOut} label="Logout" href="/" collapsed={!sidebarOpen} />
       </div>

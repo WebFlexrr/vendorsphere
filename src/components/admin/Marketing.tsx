@@ -1,14 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { exportToCSV } from '@/utils/exportUtils';
 import { 
   TrendingUp, 
   Search, 
@@ -17,41 +12,18 @@ import {
   Link, 
   Share, 
   Download,
-  FileText,
   ExternalLink,
   ArrowUpRight,
-  ArrowDownRight,
-  Printer,
-  BarChart,
-  PieChart
+  ArrowDownRight
 } from 'lucide-react';
 
 const Marketing = () => {
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [reportType, setReportType] = useState('seo');
-  const [reportFormat, setReportFormat] = useState('pdf');
-  const [includeCharts, setIncludeCharts] = useState(true);
-
-  const generateReport = () => {
-    setIsGeneratingReport(true);
-    
-    // Simulate report generation
-    setTimeout(() => {
-      setIsGeneratingReport(false);
-      alert(`Marketing ${reportType.toUpperCase()} report has been generated in ${reportFormat.toUpperCase()} format`);
-    }, 2000);
-  };
-
-  const downloadCSV = (data: any[], filename: string) => {
-    exportToCSV(data, filename);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Marketing Analytics</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="flex items-center gap-2" onClick={() => downloadCSV(topKeywords, 'marketing-keywords')}>
+          <Button variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" /> Export Report
           </Button>
         </div>
@@ -95,7 +67,7 @@ const Marketing = () => {
               <CardDescription>Last 30 days compared to previous period</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div className="h-[300px] w-full flex items-center justify-center bg-gray-50 rounded-md">
                 <div className="flex flex-col items-center text-gray-400">
                   <TrendingUp className="h-12 w-12 mb-2" />
                   <p>Organic traffic trend chart</p>
@@ -115,11 +87,11 @@ const Marketing = () => {
                     <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
                       <div>
                         <p className="font-medium">{keyword.term}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Position: {keyword.position}</p>
+                        <p className="text-sm text-gray-500">Position: {keyword.position}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{keyword.traffic.toLocaleString()}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">monthly visits</p>
+                        <p className="text-sm text-gray-500">monthly visits</p>
                       </div>
                     </div>
                   ))}
@@ -140,11 +112,11 @@ const Marketing = () => {
                     <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
                       <div>
                         <p className="font-medium">{page.title}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{page.path}</p>
+                        <p className="text-sm text-gray-500">{page.path}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{page.visitors.toLocaleString()}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">visitors</p>
+                        <p className="text-sm text-gray-500">visitors</p>
                       </div>
                     </div>
                   ))}
@@ -321,111 +293,6 @@ const Marketing = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      
-      {/* Add Marketing Report Generation Card */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-vsphere-primary" />
-            Marketing Report Generation
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="report-type">Report Type</Label>
-              <Select value={reportType} onValueChange={setReportType}>
-                <SelectTrigger id="report-type">
-                  <SelectValue placeholder="Select report type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="seo">SEO Performance</SelectItem>
-                  <SelectItem value="google">Google Ads</SelectItem>
-                  <SelectItem value="meta">Meta Ads</SelectItem>
-                  <SelectItem value="all">Comprehensive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="report-format">Report Format</Label>
-              <Select value={reportFormat} onValueChange={setReportFormat}>
-                <SelectTrigger id="report-format">
-                  <SelectValue placeholder="Select format" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF Document</SelectItem>
-                  <SelectItem value="excel">Excel Spreadsheet</SelectItem>
-                  <SelectItem value="csv">CSV File</SelectItem>
-                  <SelectItem value="ppt">PowerPoint</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Include in Report</Label>
-              <div className="flex flex-col space-y-3 pt-1">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="include-charts" 
-                    checked={includeCharts}
-                    onCheckedChange={setIncludeCharts}
-                  />
-                  <Label htmlFor="include-charts">Charts and visualizations</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch id="include-recommendations" defaultChecked />
-                  <Label htmlFor="include-recommendations">Recommendations</Label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <Separator className="my-6" />
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="justify-start">
-              <BarChart className="mr-2 h-4 w-4" />
-              Performance
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <Globe className="mr-2 h-4 w-4" />
-              Channel
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <PieChart className="mr-2 h-4 w-4" />
-              Comparison
-            </Button>
-            <Button variant="outline" className="justify-start">
-              <Target className="mr-2 h-4 w-4" />
-              Audience
-            </Button>
-          </div>
-          
-          <Separator className="my-6" />
-          
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export Data
-            </Button>
-            <Button
-              onClick={generateReport}
-              disabled={isGeneratingReport}
-              className="flex items-center gap-2"
-            >
-              {isGeneratingReport ? (
-                <>Generating...</>
-              ) : (
-                <>
-                  <FileText className="h-4 w-4" />
-                  Generate Report
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
@@ -481,7 +348,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+            <p className="text-sm font-medium text-gray-500">{title}</p>
             <h3 className="text-2xl font-bold mt-1">{value}</h3>
             <div className="flex items-center mt-1">
               <span className={`text-xs font-medium ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
@@ -491,7 +358,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
                 <ArrowUpRight className="h-3 w-3 text-green-600 ml-1" /> : 
                 <ArrowDownRight className="h-3 w-3 text-red-600 ml-1" />
               }
-              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs previous period</span>
+              <span className="text-xs text-gray-500 ml-1">vs previous period</span>
             </div>
           </div>
           <div className={`bg-vsphere-${trend === 'up' ? 'primary' : 'secondary'}/10 p-2 rounded-md`}>
