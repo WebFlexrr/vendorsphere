@@ -14,11 +14,11 @@ import {
   Download,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import ProductFrequencyTab from './analytics/ProductFrequencyTab';
-import RetentionTab from './analytics/RetentionTab';
-import PageViewsTab from './analytics/PageViewsTab';
-import MetricsOverview from './analytics/MetricsOverview';
-import OverviewCharts from './analytics/OverviewCharts';
+import ProductFrequencyTab from '../../components/admin/analytics/ProductFrequencyTab';
+import RetentionTab from '../../components/admin/analytics/RetentionTab';
+import PageViewsTab from '../../components/admin/analytics/PageViewsTab';
+import MetricsOverview from '../../components/admin/analytics/MetricsOverview';
+import OverviewCharts from '../../components/admin/analytics/OverviewCharts';
 
 const Analytics = () => {
   // Mock analytics data - fixed the trend type to use the union type 'up' | 'down'

@@ -13,14 +13,14 @@ import {
 } from 'lucide-react';
 
 // Import refactored components
-import InventoryFilters from './inventory/InventoryFilters';
-import InventoryTable from './inventory/InventoryTable';
-import MovementHistoryTable from './inventory/MovementHistoryTable';
-import LowStockAlert from './inventory/LowStockAlert';
-import AdjustStockDialog from './inventory/AdjustStockDialog';
-import MovementHistoryDialog from './inventory/MovementHistoryDialog';
-import { useInventory } from './inventory/useInventory';
-import { InventoryItem } from './inventory/types';
+import InventoryFilters from '../../components/admin/inventory/InventoryFilters';
+import InventoryTable from '../../components/admin/inventory/InventoryTable';
+import MovementHistoryTable from '../../components/admin/inventory/MovementHistoryTable';
+import LowStockAlert from '../../components/admin/inventory/LowStockAlert';
+import AdjustStockDialog from '../../components/admin/inventory/AdjustStockDialog';
+import MovementHistoryDialog from '../../components/admin/inventory/MovementHistoryDialog';
+import { useInventory } from '../../components/admin/inventory/useInventory';
+import { InventoryItem } from '../../components/admin/inventory/types';
 
 const InventoryManagement: React.FC = () => {
   const {

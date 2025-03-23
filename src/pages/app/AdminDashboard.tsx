@@ -2,10 +2,10 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import DashboardMetrics from './dashboard/DashboardMetrics';
-import OverviewTab from './dashboard/OverviewTab';
-import AnalyticsTab from './dashboard/AnalyticsTab';
-import RecentActivityTab from './dashboard/RecentActivityTab';
+import DashboardMetrics from '../../components/admin/dashboard/DashboardMetrics';
+import OverviewTab from '../../components/admin/dashboard/OverviewTab';
+import AnalyticsTab from '../../components/admin/dashboard/AnalyticsTab';
+import RecentActivityTab from '../../components/admin/dashboard/RecentActivityTab';
 
 const AdminDashboard = () => {
   return (

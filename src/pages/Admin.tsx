@@ -2,18 +2,18 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
-import AdminDashboard from '@/components/admin/AdminDashboard';
-import ProductManagement from '@/components/admin/ProductManagement';
-import OrderManagement from '@/components/admin/OrderManagement';
-import Analytics from '@/components/admin/Analytics';
-import VendorManagement from '@/components/admin/VendorManagement';
-import Marketing from '@/components/admin/Marketing';
-import Settings from '@/components/admin/Settings';
-import BlogManagement from '@/components/admin/BlogManagement';
-import EmployeeManagement from '@/components/admin/EmployeeManagement';
-import InventoryManagement from '@/components/admin/InventoryManagement';
-import UserManagement from '@/components/admin/UserManagement';
-import CMSManagement from '@/components/admin/CMSManagement';
+import AdminDashboard from '@/pages/app/AdminDashboard';
+import ProductManagement from '@/pages/app/ProductManagement';
+import OrderManagement from '@/pages/app/OrderManagement';
+import Analytics from '@/pages/app/Analytics';
+import VendorManagement from '@/pages/app/VendorManagement';
+import Marketing from '@/pages/app/Marketing';
+import Settings from '@/pages/app/Settings';
+import BlogManagement from '@/pages/app/BlogManagement';
+import EmployeeManagement from '@/pages/app/EmployeeManagement';
+import InventoryManagement from '@/pages/app/InventoryManagement';
+import UserManagement from '@/pages/app/UserManagement';
+import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 
 const Admin = () => {

@@ -9,11 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BlogPost } from './blog/types';
-import { useBlog } from './blog/useBlog';
-import BlogPostForm from './blog/BlogPostForm';
-import PerformanceMetrics from './blog/PerformanceMetrics';
-import PostDetailsDialog from './blog/PostDetailsDialog';
+import { BlogPost } from '../../components/admin/blog/types';
+import { useBlog } from '../../components/admin/blog/useBlog';
+import BlogPostForm from '../../components/admin/blog/BlogPostForm';
+import PerformanceMetrics from '../../components/admin/blog/PerformanceMetrics';
+import PostDetailsDialog from '../../components/admin/blog/PostDetailsDialog';
 
 const BlogManagement = () => {
   const { 
