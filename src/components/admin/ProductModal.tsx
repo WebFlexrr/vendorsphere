@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Package, Save, X, FileText, Tag, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormField } from '../ui/form';
 
 export type Product = {
   id: number;
@@ -55,6 +56,9 @@ interface ProductModalProps {
 }
 
 const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) => {
+
+
+
   const { toast } = useToast();
   const [formData, setFormData] = useState<Product>(
     product || {
@@ -71,6 +75,8 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
       seoScore: 0,
     }
   );
+
+  
 
   const [seoScoreFeedback, setSeoScoreFeedback] = useState({
     title: { score: 0, feedback: '' },
@@ -155,6 +161,22 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
             {product ? 'Edit Product' : 'Add New Product'}
           </DialogTitle>
         </DialogHeader>
+        {/* <Form>
+  <FormField
+    control={...}
+    name="..."
+    render={() => (
+      <FormItem>
+        <FormLabel />
+        <FormControl>
+          { /* Your form field 
+        </FormControl>
+        <FormDescription />
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+</Form> */}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
