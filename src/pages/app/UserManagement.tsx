@@ -7,97 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Search, User } from 'lucide-react';
 import { exportToCSV } from '@/utils/exportUtils';
+import { useCustomerStore } from '@/stores/customer-store';
 
-interface PurchaseHistory {
-  id: number;
-  productName: string;
-  date: string;
-  amount: number;
-  status: 'Completed' | 'Pending' | 'Refunded';
-}
-
-interface UserData {
-  id: number;
-  name: string;
-  email: string;
-  mobile: string;
-  signupDate: string;
-  lastActive: string;
-  status: 'Active' | 'Inactive' | 'Suspended';
-  purchases: PurchaseHistory[];
-}
-
-// Sample data for demonstration
-const USERS_DATA: UserData[] = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    mobile: '+1 (555) 123-4567',
-    signupDate: '2023-01-15',
-    lastActive: '2023-06-22',
-    status: 'Active',
-    purchases: [
-      { id: 101, productName: 'Premium Headphones', date: '2023-02-10', amount: 149.99, status: 'Completed' },
-      { id: 102, productName: 'Wireless Keyboard', date: '2023-04-05', amount: 79.99, status: 'Completed' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    email: 'jane.smith@example.com',
-    mobile: '+1 (555) 987-6543',
-    signupDate: '2023-02-20',
-    lastActive: '2023-06-18',
-    status: 'Active',
-    purchases: [
-      { id: 103, productName: 'Smart Watch', date: '2023-03-15', amount: 199.99, status: 'Completed' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Michael Johnson',
-    email: 'michael.j@example.com',
-    mobile: '+1 (555) 234-5678',
-    signupDate: '2023-03-05',
-    lastActive: '2023-05-30',
-    status: 'Inactive',
-    purchases: []
-  },
-  {
-    id: 4,
-    name: 'Sarah Williams',
-    email: 'sarah.w@example.com',
-    mobile: '+1 (555) 876-5432',
-    signupDate: '2023-04-12',
-    lastActive: '2023-06-21',
-    status: 'Active',
-    purchases: [
-      { id: 104, productName: 'Bluetooth Speaker', date: '2023-04-20', amount: 89.99, status: 'Completed' },
-      { id: 105, productName: 'Laptop Stand', date: '2023-05-15', amount: 34.99, status: 'Completed' },
-      { id: 106, productName: 'USB-C Hub', date: '2023-06-10', amount: 49.99, status: 'Pending' }
-    ]
-  },
-  {
-    id: 5,
-    name: 'Robert Brown',
-    email: 'robert.b@example.com',
-    mobile: '+1 (555) 345-6789',
-    signupDate: '2023-05-08',
-    lastActive: '2023-06-01',
-    status: 'Suspended',
-    purchases: [
-      { id: 107, productName: 'Wireless Mouse', date: '2023-05-10', amount: 29.99, status: 'Completed' },
-      { id: 108, productName: 'Monitor', date: '2023-05-25', amount: 249.99, status: 'Refunded' }
-    ]
-  }
-];
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<UserData[]>(USERS_DATA);
+  // const [users, setUsers] = useState<UserData[]>(USERS_DATA);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  // const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
 
+
+
+  const customers = useCustomerStore(state=>state.customer);
+  const setCustomer = useCustomerStore(state=>state.setCustomer)
+  const selectedCustomer = useCustomerStore(state=>state.selectedCustomer)
+  const setSelectedCustomer = useCustomerStore(state=>state.setSelectedCustomer)
+  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     if (!e.target.value.trim()) {
@@ -113,12 +37,12 @@ const UserManagement = () => {
     setUsers(filtered);
   };
 
-  const handleUserSelect = (user: UserData) => {
-    setSelectedUser(user);
+  const handleUserSelect = (customer: Customer) => {
+    setSelectedCustomer(customer);
   };
 
   const exportUsers = () => {
-    const data = users.map(user => ({
+    const data = customers.map(user => ({
       ID: user.id,
       Name: user.name,
       Email: user.email,
@@ -133,8 +57,8 @@ const UserManagement = () => {
     exportToCSV(data, 'users-data');
   };
 
-  const exportUserPurchases = (user: UserData) => {
-    const data = user.purchases.map(purchase => ({
+  const exportUserPurchases = (customer: Customer) => {
+    const data = customer.purchases.map(purchase => ({
       ID: purchase.id,
       Product: purchase.productName,
       Date: purchase.date,
@@ -142,7 +66,7 @@ const UserManagement = () => {
       Status: purchase.status
     }));
     
-    exportToCSV(data, `${user.name.replace(/\s+/g, '-').toLowerCase()}-purchases`);
+    exportToCSV(data, `${customer.name.replace(/\s+/g, '-').toLowerCase()}-purchases`);
   };
 
   return (
@@ -171,7 +95,7 @@ const UserManagement = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Users ({users.length})</CardTitle>
+          <CardTitle>Customer ({customers.length})</CardTitle>
           <CardDescription>View and manage user accounts</CardDescription>
         </CardHeader>
         <CardContent>
@@ -185,23 +109,23 @@ const UserManagement = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map(user => (
-                <TableRow key={user.id} className="cursor-pointer" onClick={() => handleUserSelect(user)}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.mobile}</TableCell>
-                  <TableCell>{user.signupDate}</TableCell>
+            </TableHeader><TableBody>
+              {customers.map(customer => (
+          
+                  <TableRow key={customer.id} className="cursor-pointer" onClick={() => handleUserSelect(user)}>
+                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.mobile}</TableCell>
+                  <TableCell>{customer.signupDate}</TableCell>
                   <TableCell>
                     <span 
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.status === 'Active' ? 'bg-green-100 text-green-800' : 
-                        user.status === 'Inactive' ? 'bg-gray-100 text-gray-800' : 
+                        customer.status === 'Active' ? 'bg-green-100 text-green-800' : 
+                        customer.status === 'Inactive' ? 'bg-gray-100 text-gray-800' : 
                         'bg-red-100 text-red-800'
                       }`}
                     >
-                      {user.status}
+                      {customer.status}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -209,8 +133,8 @@ const UserManagement = () => {
                       variant="outline" 
                       size="sm" 
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserSelect(user);
+                        // e.stopPropagation();
+                        handleUserSelect(customer);
                       }}
                     >
                       View Details
@@ -223,15 +147,15 @@ const UserManagement = () => {
         </CardContent>
       </Card>
       
-      {selectedUser && (
+      {selectedCustomer && (
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>User Profile: {selectedUser.name}</CardTitle>
+              <CardTitle>User Profile: {selectedCustomer.name}</CardTitle>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => exportUserPurchases(selectedUser)}
+                onClick={() => exportUserPurchases(selectedCustomer)}
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
@@ -239,7 +163,7 @@ const UserManagement = () => {
               </Button>
             </div>
             <CardDescription>
-              Last active: {selectedUser.lastActive} | Status: {selectedUser.status}
+              Last active: {selectedCustomer.lastActive} | Status: {selectedCustomer.status}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -252,40 +176,40 @@ const UserManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Name</p>
-                    <p>{selectedUser.name}</p>
+                    <p>{selectedCustomer.name}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Email</p>
-                    <p>{selectedUser.email}</p>
+                    <p>{selectedCustomer.email}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Mobile</p>
-                    <p>{selectedUser.mobile}</p>
+                    <p>{selectedCustomer.mobile}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Signup Date</p>
-                    <p>{selectedUser.signupDate}</p>
+                    <p>{selectedCustomer.signupDate}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Last Active</p>
-                    <p>{selectedUser.lastActive}</p>
+                    <p>{selectedCustomer.lastActive}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Status</p>
-                    <p>{selectedUser.status}</p>
+                    <p>{selectedCustomer.status}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Spent</p>
-                    <p>${selectedUser.purchases.reduce((sum, purchase) => sum + purchase.amount, 0).toFixed(2)}</p>
+                    <p>${selectedCustomer.purchases.reduce((sum, purchase) => sum + purchase.amount, 0).toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Purchases</p>
-                    <p>{selectedUser.purchases.length}</p>
+                    <p>{selectedCustomer.purchases.length}</p>
                   </div>
                 </div>
               </TabsContent>
               <TabsContent value="purchases" className="pt-4">
-                {selectedUser.purchases.length > 0 ? (
+                {selectedCustomer.purchases.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -297,7 +221,7 @@ const UserManagement = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {selectedUser.purchases.map(purchase => (
+                      {selectedCustomer.purchases.map(purchase => (
                         <TableRow key={purchase.id}>
                           <TableCell>{purchase.id}</TableCell>
                           <TableCell>{purchase.productName}</TableCell>

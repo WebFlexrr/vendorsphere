@@ -19,7 +19,7 @@ const VendorManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [currentVendor, setCurrentVendor] = useState<Vendor | null>(null);
+  // const [currentVendor, setCurrentVendor] = useState<Vendor | null>(null);
 
   const initialNewVendor = {
     id: 0,
@@ -38,79 +38,11 @@ const VendorManagement = () => {
 
   const pendingVendors = useVendorStore(state=>state.pendingVendors)
   const activeVendors = useVendorStore(state => state.activeVendors);
+  const approveVendor =useVendorStore(state=>state.approveVendor)
+  const rejectVendor =useVendorStore(state=>state.rejectVendor)
   const deleteVendor = useVendorStore(state=>state.deleteVendor)
-
-  // const [pendingVendors, setPendingVendors] = useState<Vendor[]>([
-  //   {
-  //     id: 1,
-  //     name: 'Craft Delights',
-  //     category: 'Artisan Crafts',
-  //     status: 'pending',
-  //     appliedDate: '2024-02-15',
-  //     email: 'info@craftdelights.com',
-  //     phone: '(555) 123-4567',
-  //     address: '123 Craft St, Artisan City, CA 94582',
-  //     description: 'Handmade artisan crafts from local artists. Specializing in pottery, jewelry, and home decor.'
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Tech Innovations',
-  //     category: 'Electronics',
-  //     status: 'pending',
-  //     appliedDate: '2024-02-14',
-  //     email: 'contact@techinnovations.com',
-  //     phone: '(555) 987-6543',
-  //     description: 'Cutting-edge electronics and tech accessories.'
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Green Living',
-  //     category: 'Home & Garden',
-  //     status: 'pending',
-  //     appliedDate: '2024-02-13',
-  //     email: 'hello@greenliving.com',
-  //     phone: '(555) 234-5678',
-  //     description: 'Eco-friendly home and garden products.'
-  //   },
-  // ]);
-
-  // const [activeVendors, setActiveVendors] = useState<Vendor[]>([
-  //   {
-  //     id: 4,
-  //     name: 'Artisan Crafts',
-  //     category: 'Home Decor',
-  //     status: 'active',
-  //     joinedDate: '2024-01-15',
-  //     rating: 4.8,
-  //     email: 'sales@artisancrafts.com',
-  //     phone: '(555) 456-7890',
-  //     address: '456 Decor Blvd, Design District, NY 10001',
-  //     description: 'Premium home decor items handcrafted by skilled artisans from around the world.'
-  //   },
-  //   {
-  //     id: 5,
-  //     name: 'Tech Universe',
-  //     category: 'Electronics',
-  //     status: 'active',
-  //     joinedDate: '2024-01-10',
-  //     rating: 4.5,
-  //     email: 'support@techuniverse.com',
-  //     phone: '(555) 567-8901',
-  //     description: 'Latest tech gadgets and electronics accessories.'
-  //   },
-  //   {
-  //     id: 6,
-  //     name: 'Fashion Forward',
-  //     category: 'Fashion',
-  //     status: 'active',
-  //     joinedDate: '2024-01-01',
-  //     rating: 4.9,
-  //     email: 'hello@fashionforward.com',
-  //     phone: '(555) 678-9012',
-  //     address: '789 Style Ave, Fashion District, CA 90015',
-  //     description: 'Trendy clothing and accessories for the fashion-conscious consumer.'
-  //   },
-  // ]);
+  const selectedVendor = useVendorStore(state=>state.selectedVendor)
+  const setSelectedVendor = useVendorStore(state=>state.setSelectedVendor)
 
   const filteredPendingVendors = searchQuery
     ? pendingVendors.filter(vendor =>
@@ -126,46 +58,51 @@ const VendorManagement = () => {
     )
     : activeVendors;
 
-  const handleApprove = (vendorId: number) => {
-    const vendorToApprove = pendingVendors.find(v => v.id === vendorId);
-    if (!vendorToApprove) return;
+  const handleApprove = async(vendorId: number) => {
+    // const vendorToApprove = pendingVendors.find(v => v.id === vendorId);
+    // if (!vendorToApprove) return;
 
-    const updatedVendor = {
-      ...vendorToApprove,
-      status: 'active',
-      joinedDate: new Date().toISOString().split('T')[0],
-      rating: 0
-    };
+    // const updatedVendor = {
+    //   ...vendorToApprove,
+    //   status: 'active',
+    //   joinedDate: new Date().toISOString().split('T')[0],
+    //   rating: 0
+    // };
 
-    setPendingVendors(pendingVendors.filter(v => v.id !== vendorId));
-    setActiveVendors([...activeVendors, updatedVendor]);
+    // setPendingVendors(pendingVendors.filter(v => v.id !== vendorId));
+    // setActiveVendors([...activeVendors, updatedVendor]);
+    approveVendor(vendorId)
 
     toast({
       title: "Vendor Approved",
-      description: `${vendorToApprove.name} has been approved successfully.`,
+      description: `${vendorId} has been approved successfully.`,
     });
   };
 
   const handleReject = (vendorId: number) => {
-    const vendorToReject = pendingVendors.find(v => v.id === vendorId);
-    if (!vendorToReject) return;
+    // const vendorToReject = pendingVendors.find(v => v.id === vendorId);
+    // if (!vendorToReject) return;
 
-    setPendingVendors(pendingVendors.filter(v => v.id !== vendorId));
+    // setPendingVendors(pendingVendors.filter(v => v.id !== vendorId));
+
+    rejectVendor(vendorId)
 
     toast({
       title: "Vendor Rejected",
-      description: `${vendorToReject.name}'s application has been rejected.`,
+      description: `${vendorId}'s application has been rejected.`,
       variant: "destructive",
     });
   };
 
   const handleViewVendor = (vendor: Vendor) => {
-    setCurrentVendor(vendor);
+    // setCurrentVendor(vendor);
+    setSelectedVendor(vendor)
     setIsViewModalOpen(true);
   };
 
   const handleEditVendor = (vendor: Vendor) => {
-    setCurrentVendor(vendor);
+    // setCurrentVendor(vendor);
+    setSelectedVendor(vendor);
     setIsEditModalOpen(true);
   };
 
@@ -298,7 +235,7 @@ const VendorManagement = () => {
                   <p className="text-center py-4 text-gray-500">No pending vendor applications found.</p>
                 ) : (
                   filteredPendingVendors.map((vendor) => (
-                    <div key={vendor.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+                    <Card key={vendor.id} className="flex shadow-none items-center justify-between p-4 border rounded-lg bg-card">
                       <div>
                         <h3 className="font-medium">{vendor.name}</h3>
                         <div className="text-sm text-muted-foreground">
@@ -332,7 +269,7 @@ const VendorManagement = () => {
                           Reject
                         </Button>
                       </div>
-                    </div>
+                    </Card>
                   ))
                 )}
               </div>
@@ -396,7 +333,7 @@ const VendorManagement = () => {
         </TabsContent>
       </Tabs>
 
-      {isViewModalOpen && currentVendor && (
+      {isViewModalOpen && selectedVendor && (
         <Dialog open={isViewModalOpen} onOpenChange={() => setIsViewModalOpen(false)}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -410,19 +347,19 @@ const VendorManagement = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-4 border-b">
                 <div className="h-16 w-16 rounded-full bg-vsphere-light/50 flex items-center justify-center">
                   <span className="text-2xl font-medium text-vsphere-primary">
-                    {currentVendor.name.charAt(0)}
+                    {selectedVendor.name.charAt(0)}
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">{currentVendor.name}</h2>
+                  <h2 className="text-xl font-semibold">{selectedVendor.name}</h2>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    <Badge variant="outline">{currentVendor.category}</Badge>
-                    <Badge className={currentVendor.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
-                      {currentVendor.status === 'active' ? 'Active' : 'Pending'}
+                    <Badge variant="outline">{selectedVendor.category}</Badge>
+                    <Badge className={selectedVendor.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                      {selectedVendor.status === 'active' ? 'Active' : 'Pending'}
                     </Badge>
-                    {currentVendor.rating && (
+                    {selectedVendor.rating && (
                       <Badge className="bg-yellow-100 text-yellow-700 flex items-center gap-1">
-                        {currentVendor.rating} <Star className="h-3 w-3" fill="currentColor" />
+                        {selectedVendor.rating} <Star className="h-3 w-3" fill="currentColor" />
                       </Badge>
                     )}
                   </div>
@@ -432,45 +369,45 @@ const VendorManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Email</Label>
-                  <p>{currentVendor.email || 'N/A'}</p>
+                  <p>{selectedVendor.email || 'N/A'}</p>
                 </div>
 
                 <div>
                   <Label className="text-muted-foreground">Phone</Label>
-                  <p>{currentVendor.phone || 'N/A'}</p>
+                  <p>{selectedVendor.phone || 'N/A'}</p>
                 </div>
 
-                {currentVendor.address && (
+                {selectedVendor.address && (
                   <div className="md:col-span-2">
                     <Label className="text-muted-foreground">Address</Label>
-                    <p>{currentVendor.address}</p>
+                    <p>{selectedVendor.address}</p>
                   </div>
                 )}
 
                 <div>
                   <Label className="text-muted-foreground">
-                    {currentVendor.status === 'active' ? 'Joined Date' : 'Applied Date'}
+                    {selectedVendor.status === 'active' ? 'Joined Date' : 'Applied Date'}
                   </Label>
-                  <p>{currentVendor.joinedDate || currentVendor.appliedDate}</p>
+                  <p>{selectedVendor.joinedDate || selectedVendor.appliedDate}</p>
                 </div>
               </div>
 
-              {currentVendor.description && (
+              {selectedVendor.description && (
                 <div className="mt-2">
                   <Label className="text-muted-foreground">Description</Label>
-                  <p className="mt-1">{currentVendor.description}</p>
+                  <p className="mt-1">{selectedVendor.description}</p>
                 </div>
               )}
             </div>
 
             <DialogFooter className="flex justify-between">
-              {currentVendor.status === 'pending' ? (
+              {selectedVendor.status === 'pending' ? (
                 <>
                   <Button
                     variant="outline"
                     className="text-red-600 hover:text-red-700"
                     onClick={() => {
-                      handleReject(currentVendor.id);
+                      handleReject(selectedVendor.id);
                       setIsViewModalOpen(false);
                     }}
                   >
@@ -480,7 +417,7 @@ const VendorManagement = () => {
                   <Button
                     className="bg-vsphere-primary hover:bg-vsphere-primary/90"
                     onClick={() => {
-                      handleApprove(currentVendor.id);
+                      handleApprove(selectedVendor.id);
                       setIsViewModalOpen(false);
                     }}
                   >
@@ -499,7 +436,7 @@ const VendorManagement = () => {
                   <Button
                     onClick={() => {
                       setIsViewModalOpen(false);
-                      handleEditVendor(currentVendor);
+                      handleEditVendor(selectedVendor);
                     }}
                   >
                     <Edit className="h-4 w-4 mr-2" />
@@ -512,7 +449,7 @@ const VendorManagement = () => {
         </Dialog>
       )}
 
-      {isEditModalOpen && currentVendor && (
+      {isEditModalOpen && selectedVendor && (
         <Dialog open={isEditModalOpen} onOpenChange={() => setIsEditModalOpen(false)}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -527,7 +464,7 @@ const VendorManagement = () => {
 
               const formData = new FormData(e.currentTarget);
               const updatedVendor = {
-                ...currentVendor,
+                ...selectedVendor,
                 name: formData.get('name') as string,
                 category: formData.get('category') as string,
                 email: formData.get('email') as string,
@@ -544,7 +481,7 @@ const VendorManagement = () => {
                   <Input
                     id="name"
                     name="name"
-                    defaultValue={currentVendor.name}
+                    defaultValue={selectedVendor.name}
                     className="col-span-3"
                     required
                   />
@@ -555,7 +492,7 @@ const VendorManagement = () => {
                   <Input
                     id="category"
                     name="category"
-                    defaultValue={currentVendor.category}
+                    defaultValue={selectedVendor.category}
                     className="col-span-3"
                     required
                   />
@@ -567,7 +504,7 @@ const VendorManagement = () => {
                     id="email"
                     name="email"
                     type="email"
-                    defaultValue={currentVendor.email}
+                    defaultValue={selectedVendor.email}
                     className="col-span-3"
                   />
                 </div>
@@ -577,7 +514,7 @@ const VendorManagement = () => {
                   <Input
                     id="phone"
                     name="phone"
-                    defaultValue={currentVendor.phone}
+                    defaultValue={selectedVendor.phone}
                     className="col-span-3"
                   />
                 </div>
@@ -587,7 +524,7 @@ const VendorManagement = () => {
                   <Input
                     id="address"
                     name="address"
-                    defaultValue={currentVendor.address}
+                    defaultValue={selectedVendor.address}
                     className="col-span-3"
                   />
                 </div>
@@ -597,13 +534,13 @@ const VendorManagement = () => {
                   <Textarea
                     id="description"
                     name="description"
-                    defaultValue={currentVendor.description}
+                    defaultValue={selectedVendor.description}
                     className="col-span-3"
                     rows={3}
                   />
                 </div>
 
-                {currentVendor.status === 'active' && (
+                {selectedVendor.status === 'active' && (
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="rating" className="text-right">Rating</Label>
                     <div className="flex items-center col-span-3">
@@ -614,7 +551,7 @@ const VendorManagement = () => {
                         min="0"
                         max="5"
                         step="0.1"
-                        defaultValue={currentVendor.rating}
+                        defaultValue={selectedVendor.rating}
                         className="w-24"
                       />
                       <Star className="h-4 w-4 text-yellow-500 ml-2" fill="currentColor" />

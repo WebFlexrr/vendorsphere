@@ -1,18 +1,18 @@
 import { create } from "zustand";
 
-export type Vendor = {
-  id: number;
-  name: string;
-  category: string;
-  status: 'pending' | 'active';
-  email: string;
-  phone?: string;
-  address?: string;
-  description?: string;
-  appliedDate?: string;
-  joinedDate?: string;
-  rating?: number;
-};
+// export type Vendor = {
+//   id: number;
+//   name: string;
+//   category: string;
+//   status: 'pending' | 'active';
+//   email: string;
+//   phone?: string;
+//   address?: string;
+//   description?: string;
+//   appliedDate?: string;
+//   joinedDate?: string;
+//   rating?: number;
+// };
 
 interface VendorState {
   pendingVendors: Vendor[];
@@ -147,29 +147,40 @@ export const useVendorStore = create<VendorStore>((set, get) => ({
       activeVendors: state.activeVendors.filter((v) => v.id !== vendorId),
     })),
 
-  approveVendor: (vendorId: number) =>
+  approveVendor: (vendorId: number) =>{
+
     set((state) => {
       const vendor = state.pendingVendors.find((v) => v.id === vendorId);
       if (!vendor) return state;
-
+      
       const approvedVendor = {
         ...vendor,
         status: 'active' as const,
         joinedDate: new Date().toISOString().split('T')[0],
         rating: 0,
       };
-
+      
+      
+      
       return {
         pendingVendors: state.pendingVendors.filter((v) => v.id !== vendorId),
         activeVendors: [...state.activeVendors, approvedVendor],
       };
-    }),
+    })
+   
+  }
+  ,
 
-  rejectVendor: (vendorId: number) =>
+  rejectVendor: (vendorId: number) =>{
+
     set((state) => ({
       pendingVendors: state.pendingVendors.filter((v) => v.id !== vendorId),
-    })),
-
+    }))
+  
+  
+  }
+  ,
+  
   updateVendorRating: (vendorId: number, rating: number) =>
     set((state) => ({
       activeVendors: state.activeVendors.map((v) =>
