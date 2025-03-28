@@ -8,7 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Package, Save, X, FileText, Tag, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormField } from '../ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { productSchema } from '@/schemas/product';
 
 export type Product = {
   id: number;
@@ -76,7 +81,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     }
   );
 
-  
+
 
   const [seoScoreFeedback, setSeoScoreFeedback] = useState({
     title: { score: 0, feedback: '' },
@@ -92,17 +97,17 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     const titleScore = formData.seoTitle && formData.seoTitle.length > 10 && formData.seoTitle.length < 70 ? 100 : 50;
     const descScore = formData.seoDescription && formData.seoDescription.length > 120 && formData.seoDescription.length < 160 ? 100 : 60;
     const keywordsScore = formData.seoKeywords && formData.seoKeywords.split(',').length >= 3 ? 90 : 70;
-    
+
     setSeoScoreFeedback({
-      title: { 
+      title: {
         score: titleScore,
         feedback: titleScore < 100 ? 'Title should be between 10-70 characters for best SEO.' : 'Great title length!'
       },
-      description: { 
+      description: {
         score: descScore,
         feedback: descScore < 100 ? 'Meta description should be 120-160 characters.' : 'Optimal meta description length!'
       },
-      keywords: { 
+      keywords: {
         score: keywordsScore,
         feedback: keywordsScore < 90 ? 'Include at least 3 relevant keywords.' : 'Good keyword set!'
       }
@@ -122,9 +127,55 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   // Validate form
+  //   if (!formData.name || !formData.category || !formData.vendor) {
+  //     toast({
+  //       title: "Validation Error",
+  //       description: "Please fill in all required fields.",
+  //       variant: "destructive"
+  //     });
+  //     return;
+  //   }
+
+  //   // Update status based on stock
+  //   const status = formData.stock === 0 ? 'Out of stock' : formData.stock < 10 ? 'Low stock' : 'Active';
+
+  //   // Calculate SEO score
+  //   const seoScore = calculateOverallSeoScore();
+
+  //   // Save the product with updated status and SEO score
+  //   onSave({ ...formData, status, seoScore });
+
+  //   toast({
+  //     title: product ? "Product Updated" : "Product Created",
+  //     description: `${formData.name} has been successfully ${product ? 'updated' : 'added'}.`,
+  //   });
+
+  //   onClose();
+  // };
+
+  // 1. Define your form.
+  const form = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
+
+  })
+
+  const { watch } = form
+
+  const seoTitleCount = watch("seoTitle")
+  const seoDescriptionCount = watch("seoDescription")
+
+
+  // 2. Define a submit handler.
+  function onSubmit(values: z.infer<typeof productSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values)
+
+
     // Validate form
     if (!formData.name || !formData.category || !formData.vendor) {
       toast({
@@ -137,20 +188,23 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
 
     // Update status based on stock
     const status = formData.stock === 0 ? 'Out of stock' : formData.stock < 10 ? 'Low stock' : 'Active';
-    
+
     // Calculate SEO score
     const seoScore = calculateOverallSeoScore();
-    
+
     // Save the product with updated status and SEO score
     onSave({ ...formData, status, seoScore });
-    
+
     toast({
       title: product ? "Product Updated" : "Product Created",
       description: `${formData.name} has been successfully ${product ? 'updated' : 'added'}.`,
     });
-    
+
     onClose();
-  };
+
+
+
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -161,24 +215,229 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
             {product ? 'Edit Product' : 'Add New Product'}
           </DialogTitle>
         </DialogHeader>
-        {/* <Form>
-  <FormField
-    control={...}
-    name="..."
-    render={() => (
-      <FormItem>
-        <FormLabel />
-        <FormControl>
-          { /* Your form field 
-        </FormControl>
-        <FormDescription />
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-</Form> */}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-4 items-center gap-4">
+
+                        <FormLabel className="text-right">Name</FormLabel>
+                        <FormControl className="col-span-3">
+                          <Input placeholder="shadcn" {...field} />
+                        </FormControl>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-4 items-center gap-4">
+
+                        <FormLabel className="text-right">Category</FormLabel>
+                        <FormControl className="col-span-3">
+                          <Input placeholder="shadcn" {...field} />
+                        </FormControl>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="vendor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-4 items-center gap-4">
+
+                        <FormLabel className="text-right">Vendor</FormLabel>
+                        <FormControl className="col-span-3">
+                          <Input placeholder="shadcn" {...field} />
+                        </FormControl>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-4 items-center gap-4">
+
+                        <FormLabel className="text-right">Price</FormLabel>
+                        <FormControl className="col-span-3">
+                          <Input type="number" placeholder="shadcn" {...field} />
+                        </FormControl>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-4 items-center gap-4">
+
+                        <FormLabel className="text-right">Stock</FormLabel>
+                        <FormControl className="col-span-3">
+                          <Input type="number" placeholder="shadcn" {...field} />
+                        </FormControl>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              </div>
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-md flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      SEO Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+
+                      <FormField
+                        control={form.control}
+                        name="seoTitle"
+                        render={({ field }) => (
+                          <FormItem>
+
+
+                            <FormLabel className=" flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />
+                              <Label htmlFor="seoTitle">SEO Title</Label></FormLabel>
+                            <FormControl>
+                              <Input placeholder="Optimized title for search engines" {...field} />
+                            </FormControl>
+
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="text-xs text-muted-foreground flex justify-between">
+                        <span>Recommended: 10-70 characters</span>
+                        {/* <span className={(formData.seoTitle?.length || 0) > 70 ? "text-red-500" : ""}>
+                        {formData.seoTitle?.length || 0}/70
+                      </span> */}
+                        <span className={(seoTitleCount?.length || 0) > 70 ? "text-red-500" : ""}>
+                          {seoTitleCount?.length || 0}/70
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+
+                      <FormField
+                        control={form.control}
+                        name="seoDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className=" flex items-center gap-2"> <FileText className="h-4 w-4 text-muted-foreground" />
+                              <Label htmlFor="seoDescription">Meta Description</Label></FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Brief description for search results" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="text-xs text-muted-foreground flex justify-between">
+                        <span>Recommended: 120-160 characters</span>
+                        <span className={(seoDescriptionCount?.length || 0) > 160 ? "text-red-500" : ""}>
+                          {seoDescriptionCount?.length || 0}/160
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+
+                      <FormField
+                        control={form.control}
+                        name="seoKeywords"
+                        render={({ field }) => (
+                          <FormItem>
+
+
+                            <FormLabel className=" flex items-center gap-2"><Tag className="h-4 w-4 text-muted-foreground" />
+                              <Label htmlFor="seoKeywords">Focus Keywords</Label></FormLabel>
+                            <FormControl>
+                              <Input placeholder="Optimized title for search engines" {...field} />
+                            </FormControl>
+
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Separate keywords with commas
+                      </p>
+                    </div>
+
+                    {(formData.seoTitle || formData.seoDescription || formData.seoKeywords) && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">SEO Score: {calculateOverallSeoScore()}%</p>
+                        <div className="space-y-2">
+                          <SeoScoreItem
+                            title="Title"
+                            score={seoScoreFeedback.title.score}
+                            feedback={seoScoreFeedback.title.feedback}
+                          />
+                          <SeoScoreItem
+                            title="Meta Description"
+                            score={seoScoreFeedback.description.score}
+                            feedback={seoScoreFeedback.description.feedback}
+                          />
+                          <SeoScoreItem
+                            title="Keywords"
+                            score={seoScoreFeedback.keywords.score}
+                            feedback={seoScoreFeedback.keywords.feedback}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+            </div>
+
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose} className="gap-1">
+                <X className="h-4 w-4" /> Cancel
+              </Button>
+              <Button type="submit" className="gap-1 bg-vsphere-primary hover:bg-vsphere-primary/90">
+                <Save className="h-4 w-4" /> Save Product
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+
+        {/* <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -349,7 +608,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
               <Save className="h-4 w-4" /> Save Product
             </Button>
           </DialogFooter>
-        </form>
+        </form> */}
       </DialogContent>
     </Dialog>
   );
