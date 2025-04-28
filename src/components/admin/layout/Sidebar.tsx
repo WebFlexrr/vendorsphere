@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, BarChart, Megaphone, 
-  FileText, UserCircle, LayoutTemplate, User, Bell
+  FileText, UserCircle, LayoutTemplate, User, Bell, LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -36,10 +35,17 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       <div className="p-3 md:p-4">
         <nav className="space-y-1">
           <SidebarItem 
+            icon={LayoutGrid} 
+            label="App Launcher" 
+            href="/admin/app-launcher" 
+            active={location.pathname === '/admin/app-launcher'} 
+            collapsed={!sidebarOpen} 
+          />
+          <SidebarItem 
             icon={LayoutDashboard} 
             label="Dashboard" 
-            active={location.pathname === '/'} 
-            href="/" 
+            active={location.pathname === '/admin'} 
+            href="/admin" 
             collapsed={!sidebarOpen} 
           />
           <SidebarItem 

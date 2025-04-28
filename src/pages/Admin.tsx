@@ -15,6 +15,7 @@ import InventoryManagement from '@/pages/app/InventoryManagement';
 import UserManagement from '@/pages/app/UserManagement';
 import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
+import AppLauncher from '@/pages/app/AppLauncher';
 
 const Admin = () => {
   return (
@@ -34,6 +35,7 @@ const Admin = () => {
           <Route path="/users" element={<UserManagement />} />
           <Route path="/cms" element={<CMSManagement />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/app-launcher" element={<AppLauncher />} />
         </Routes>
       </AdminLayout>
     </div>
