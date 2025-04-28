@@ -30,8 +30,8 @@ const Loading = () => (
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Suspense fallback={<Loading />}>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -58,9 +58,9 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-        </Router>
-        <Toaster />
-      </AuthProvider>
+          <Toaster />
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }
