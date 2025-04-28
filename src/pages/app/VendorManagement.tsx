@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,9 @@ import { Search, User, Users, Star, Phone, Mail, Calendar, Download } from 'luci
 import { exportToCSV } from '@/utils/exportUtils';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+
+// Using the explicit Vendor type from vendor-store
+import type { Vendor } from '@/stores/vendor-store';
 
 const VendorManagement = () => {
   const {
