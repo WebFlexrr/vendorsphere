@@ -1,19 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Package, Save, X, FileText, Tag, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useVendorStore } from '@/stores/vendor-store';
 import { z } from 'zod';
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { toast } from 'sonner';
 import { productSchema } from '@/schemas/product';
+import { motion } from 'framer-motion';
 
 export type Product = {
   id: number;
@@ -23,34 +20,11 @@ export type Product = {
   price: number;
   stock: number;
   status: string;
+  description?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
   seoScore?: number;
-};
-
-interface SeoScoreItem {
-  title: string;
-  score: number;
-  feedback: string;
-}
-
-const SeoScoreItem = ({ title, score, feedback }: SeoScoreItem) => {
-  let colorClass = "bg-green-100 text-green-800";
-  if (score < 70) colorClass = "bg-red-100 text-red-800";
-  else if (score < 90) colorClass = "bg-yellow-100 text-yellow-800";
-
-  return (
-    <div className="flex items-start gap-2">
-      <div className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
-        {score}
-      </div>
-      <div>
-        <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{feedback}</p>
-      </div>
-    </div>
-  );
 };
 
 interface ProductModalProps {
@@ -60,424 +34,172 @@ interface ProductModalProps {
   onSave: (product: Product) => void;
 }
 
-const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) => {
+const initialProductState: Product = {
+  id: 0,
+  name: '',
+  category: '',
+  vendor: '',
+  price: 0,
+  stock: 0,
+  status: 'Active',
+  description: '',
+};
 
-
-
-  const { toast } = useToast();
-  const [formData, setFormData] = useState<Product>(
-    product || {
-      id: Date.now(),
-      name: '',
-      category: '',
-      vendor: '',
-      price: 0,
-      stock: 0,
-      status: 'Active',
-      seoTitle: '',
-      seoDescription: '',
-      seoKeywords: '',
-      seoScore: 0,
-    }
-  );
-
-
-
-  const [seoScoreFeedback, setSeoScoreFeedback] = useState({
-    title: { score: 0, feedback: '' },
-    description: { score: 0, feedback: '' },
-    keywords: { score: 0, feedback: '' },
-  });
+const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, onSave }) => {
+  const [formData, setFormData] = useState<Product>({ ...initialProductState });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { activeVendors } = useVendorStore();
 
   useEffect(() => {
-    updateSeoScores();
-  }, [formData.seoTitle, formData.seoDescription, formData.seoKeywords]);
-
-  const updateSeoScores = () => {
-    const titleScore = formData.seoTitle && formData.seoTitle.length > 10 && formData.seoTitle.length < 70 ? 100 : 50;
-    const descScore = formData.seoDescription && formData.seoDescription.length > 120 && formData.seoDescription.length < 160 ? 100 : 60;
-    const keywordsScore = formData.seoKeywords && formData.seoKeywords.split(',').length >= 3 ? 90 : 70;
-
-    setSeoScoreFeedback({
-      title: {
-        score: titleScore,
-        feedback: titleScore < 100 ? 'Title should be between 10-70 characters for best SEO.' : 'Great title length!'
-      },
-      description: {
-        score: descScore,
-        feedback: descScore < 100 ? 'Meta description should be 120-160 characters.' : 'Optimal meta description length!'
-      },
-      keywords: {
-        score: keywordsScore,
-        feedback: keywordsScore < 90 ? 'Include at least 3 relevant keywords.' : 'Good keyword set!'
-      }
-    });
-  };
-
-  const calculateOverallSeoScore = () => {
-    const { title, description, keywords } = seoScoreFeedback;
-    return Math.round((title.score + description.score + keywords.score) / 3);
-  };
+    if (product) {
+      setFormData({ ...product });
+    } else {
+      // Generate a new ID for new products
+      const newId = Math.floor(Math.random() * 10000);
+      setFormData({ ...initialProductState, id: newId });
+    }
+  }, [product]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [name]: name === 'price' || name === 'stock' ? parseFloat(value) || 0 : value,
-    }));
+    });
   };
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   // Validate form
-  //   if (!formData.name || !formData.category || !formData.vendor) {
-  //     toast({
-  //       title: "Validation Error",
-  //       description: "Please fill in all required fields.",
-  //       variant: "destructive"
-  //     });
-  //     return;
-  //   }
-
-  //   // Update status based on stock
-  //   const status = formData.stock === 0 ? 'Out of stock' : formData.stock < 10 ? 'Low stock' : 'Active';
-
-  //   // Calculate SEO score
-  //   const seoScore = calculateOverallSeoScore();
-
-  //   // Save the product with updated status and SEO score
-  //   onSave({ ...formData, status, seoScore });
-
-  //   toast({
-  //     title: product ? "Product Updated" : "Product Created",
-  //     description: `${formData.name} has been successfully ${product ? 'updated' : 'added'}.`,
-  //   });
-
-  //   onClose();
-  // };
-
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof productSchema>>({
-    resolver: zodResolver(productSchema),
-
-  })
-
-  const { watch } = form
-
-  const seoTitleCount = watch("seoTitle")
-  const seoDescriptionCount = watch("seoDescription")
-
-
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof productSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-
-
-    // Validate form
-    if (!formData.name || !formData.category || !formData.vendor) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Update status based on stock
-    const status = formData.stock === 0 ? 'Out of stock' : formData.stock < 10 ? 'Low stock' : 'Active';
-
-    // Calculate SEO score
-    const seoScore = calculateOverallSeoScore();
-
-    // Save the product with updated status and SEO score
-    onSave({ ...formData, status, seoScore });
-
-    toast({
-      title: product ? "Product Updated" : "Product Created",
-      description: `${formData.name} has been successfully ${product ? 'updated' : 'added'}.`,
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData({
+      ...formData,
+      [name]: value,
     });
+  };
 
-    onClose();
+  const updateStatus = () => {
+    // Update status based on stock
+    let status = 'Active';
+    if (formData.stock <= 0) {
+      status = 'Out of stock';
+    } else if (formData.stock < 10) {
+      status = 'Low stock';
+    }
+    setFormData({
+      ...formData,
+      status,
+    });
+  };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    try {
+      productSchema.parse({
+        name: formData.name,
+        category: formData.category,
+        vendor: formData.vendor,
+        price: String(formData.price),
+        stock: String(formData.stock),
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Update status before validation
+    updateStatus();
+    
+    if (validateForm()) {
+      onSave(formData);
+      onClose();
+      toast.success(product ? 'Product updated successfully' : 'Product added successfully');
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+          <DialogTitle className="text-xl font-bold">
             {product ? 'Edit Product' : 'Add New Product'}
           </DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="grid grid-cols-4 items-center gap-4">
-
-                        <FormLabel className="text-right">Name</FormLabel>
-                        <FormControl className="col-span-3">
-                          <Input placeholder="shadcn" {...field} />
-                        </FormControl>
-
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="grid grid-cols-4 items-center gap-4">
-
-                        <FormLabel className="text-right">Category</FormLabel>
-                        <FormControl className="col-span-3">
-                          <Input placeholder="shadcn" {...field} />
-                        </FormControl>
-
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="vendor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="grid grid-cols-4 items-center gap-4">
-
-                        <FormLabel className="text-right">Vendor</FormLabel>
-                        <FormControl className="col-span-3">
-                          <Input placeholder="shadcn" {...field} />
-                        </FormControl>
-
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="grid grid-cols-4 items-center gap-4">
-
-                        <FormLabel className="text-right">Price</FormLabel>
-                        <FormControl className="col-span-3">
-                          <Input type="number" placeholder="shadcn" {...field} />
-                        </FormControl>
-
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="grid grid-cols-4 items-center gap-4">
-
-                        <FormLabel className="text-right">Stock</FormLabel>
-                        <FormControl className="col-span-3">
-                          <Input type="number" placeholder="shadcn" {...field} />
-                        </FormControl>
-
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-              </div>
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      SEO Settings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-
-                      <FormField
-                        control={form.control}
-                        name="seoTitle"
-                        render={({ field }) => (
-                          <FormItem>
-
-
-                            <FormLabel className=" flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />
-                              <Label htmlFor="seoTitle">SEO Title</Label></FormLabel>
-                            <FormControl>
-                              <Input placeholder="Optimized title for search engines" {...field} />
-                            </FormControl>
-
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="text-xs text-muted-foreground flex justify-between">
-                        <span>Recommended: 10-70 characters</span>
-                        {/* <span className={(formData.seoTitle?.length || 0) > 70 ? "text-red-500" : ""}>
-                        {formData.seoTitle?.length || 0}/70
-                      </span> */}
-                        <span className={(seoTitleCount?.length || 0) > 70 ? "text-red-500" : ""}>
-                          {seoTitleCount?.length || 0}/70
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-
-                      <FormField
-                        control={form.control}
-                        name="seoDescription"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className=" flex items-center gap-2"> <FileText className="h-4 w-4 text-muted-foreground" />
-                              <Label htmlFor="seoDescription">Meta Description</Label></FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Brief description for search results" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div className="text-xs text-muted-foreground flex justify-between">
-                        <span>Recommended: 120-160 characters</span>
-                        <span className={(seoDescriptionCount?.length || 0) > 160 ? "text-red-500" : ""}>
-                          {seoDescriptionCount?.length || 0}/160
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-
-                      <FormField
-                        control={form.control}
-                        name="seoKeywords"
-                        render={({ field }) => (
-                          <FormItem>
-
-
-                            <FormLabel className=" flex items-center gap-2"><Tag className="h-4 w-4 text-muted-foreground" />
-                              <Label htmlFor="seoKeywords">Focus Keywords</Label></FormLabel>
-                            <FormControl>
-                              <Input placeholder="Optimized title for search engines" {...field} />
-                            </FormControl>
-
-
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Separate keywords with commas
-                      </p>
-                    </div>
-
-                    {(formData.seoTitle || formData.seoDescription || formData.seoKeywords) && (
-                      <div className="mt-4 space-y-2">
-                        <p className="text-sm font-medium">SEO Score: {calculateOverallSeoScore()}%</p>
-                        <div className="space-y-2">
-                          <SeoScoreItem
-                            title="Title"
-                            score={seoScoreFeedback.title.score}
-                            feedback={seoScoreFeedback.title.feedback}
-                          />
-                          <SeoScoreItem
-                            title="Meta Description"
-                            score={seoScoreFeedback.description.score}
-                            feedback={seoScoreFeedback.description.feedback}
-                          />
-                          <SeoScoreItem
-                            title="Keywords"
-                            score={seoScoreFeedback.keywords.score}
-                            feedback={seoScoreFeedback.keywords.feedback}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter product name"
+                className={errors.name ? 'border-red-500' : ''}
+              />
+              {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
             </div>
-
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose} className="gap-1">
-                <X className="h-4 w-4" /> Cancel
-              </Button>
-              <Button type="submit" className="gap-1 bg-vsphere-primary hover:bg-vsphere-primary/90">
-                <Save className="h-4 w-4" /> Save Product
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-
-        {/* <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">Category</Label>
-                <Input
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="vendor" className="text-right">Vendor</Label>
-                <Input
-                  id="vendor"
-                  name="vendor"
-                  value={formData.vendor}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">Price ($)</Label>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => handleSelectChange('category', value)}
+              >
+                <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Electronics">Electronics</SelectItem>
+                  <SelectItem value="Fashion">Fashion</SelectItem>
+                  <SelectItem value="Home & Garden">Home & Garden</SelectItem>
+                  <SelectItem value="Sports & Outdoors">Sports & Outdoors</SelectItem>
+                  <SelectItem value="Beauty & Personal Care">Beauty & Personal Care</SelectItem>
+                  <SelectItem value="Books">Books</SelectItem>
+                  <SelectItem value="Toys & Games">Toys & Games</SelectItem>
+                  <SelectItem value="Food & Beverages">Food & Beverages</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="vendor">Vendor</Label>
+              <Select
+                value={formData.vendor}
+                onValueChange={(value) => handleSelectChange('vendor', value)}
+              >
+                <SelectTrigger className={errors.vendor ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select a vendor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeVendors.map((vendor) => (
+                    <SelectItem key={vendor.id} value={vendor.name}>
+                      {vendor.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="Direct Supplier">Direct Supplier</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.vendor && <p className="text-xs text-red-500">{errors.vendor}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                 <Input
                   id="price"
                   name="price"
@@ -486,129 +208,106 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
                   step="0.01"
                   value={formData.price}
                   onChange={handleChange}
-                  className="col-span-3"
-                  required
+                  placeholder="0.00"
+                  className={`pl-7 ${errors.price ? 'border-red-500' : ''}`}
                 />
               </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="stock" className="text-right">Stock</Label>
-                <Input
-                  id="stock"
-                  name="stock"
-                  type="number"
-                  min="0"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
+              {errors.price && <p className="text-xs text-red-500">{errors.price}</p>}
             </div>
             
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    SEO Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="seoTitle">SEO Title</Label>
-                    </div>
-                    <Input
-                      id="seoTitle"
-                      name="seoTitle"
-                      placeholder="Optimized title for search engines"
-                      value={formData.seoTitle || ''}
-                      onChange={handleChange}
-                    />
-                    <div className="text-xs text-muted-foreground flex justify-between">
-                      <span>Recommended: 10-70 characters</span>
-                      <span className={(formData.seoTitle?.length || 0) > 70 ? "text-red-500" : ""}>
-                        {formData.seoTitle?.length || 0}/70
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="seoDescription">Meta Description</Label>
-                    </div>
-                    <Textarea
-                      id="seoDescription"
-                      name="seoDescription"
-                      rows={3}
-                      placeholder="Brief description for search results"
-                      value={formData.seoDescription || ''}
-                      onChange={handleChange}
-                    />
-                    <div className="text-xs text-muted-foreground flex justify-between">
-                      <span>Recommended: 120-160 characters</span>
-                      <span className={(formData.seoDescription?.length || 0) > 160 ? "text-red-500" : ""}>
-                        {formData.seoDescription?.length || 0}/160
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Tag className="h-4 w-4 text-muted-foreground" />
-                      <Label htmlFor="seoKeywords">Focus Keywords</Label>
-                    </div>
-                    <Input
-                      id="seoKeywords"
-                      name="seoKeywords"
-                      placeholder="keyword1, keyword2, keyword3"
-                      value={formData.seoKeywords || ''}
-                      onChange={handleChange}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Separate keywords with commas
-                    </p>
-                  </div>
-                  
-                  {(formData.seoTitle || formData.seoDescription || formData.seoKeywords) && (
-                    <div className="mt-4 space-y-2">
-                      <p className="text-sm font-medium">SEO Score: {calculateOverallSeoScore()}%</p>
-                      <div className="space-y-2">
-                        <SeoScoreItem
-                          title="Title"
-                          score={seoScoreFeedback.title.score}
-                          feedback={seoScoreFeedback.title.feedback}
-                        />
-                        <SeoScoreItem
-                          title="Meta Description"
-                          score={seoScoreFeedback.description.score}
-                          feedback={seoScoreFeedback.description.feedback}
-                        />
-                        <SeoScoreItem
-                          title="Keywords"
-                          score={seoScoreFeedback.keywords.score}
-                          feedback={seoScoreFeedback.keywords.feedback}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock Quantity</Label>
+              <Input
+                id="stock"
+                name="stock"
+                type="number"
+                min="0"
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="Enter stock quantity"
+                className={errors.stock ? 'border-red-500' : ''}
+              />
+              {errors.stock && <p className="text-xs text-red-500">{errors.stock}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Input
+                id="status"
+                name="status"
+                value={formData.status}
+                readOnly
+                className="bg-gray-100 dark:bg-gray-800"
+              />
+              <p className="text-xs text-gray-500">Status is auto-calculated based on stock levels</p>
             </div>
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description || ''}
+              onChange={handleChange}
+              placeholder="Enter product description"
+              rows={4}
+            />
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg space-y-4">
+              <h3 className="font-medium">SEO Information (Optional)</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="seoTitle">SEO Title</Label>
+                <Input
+                  id="seoTitle"
+                  name="seoTitle"
+                  value={formData.seoTitle || ''}
+                  onChange={handleChange}
+                  placeholder="SEO title for product"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="seoDescription">SEO Description</Label>
+                <Textarea
+                  id="seoDescription"
+                  name="seoDescription"
+                  value={formData.seoDescription || ''}
+                  onChange={handleChange}
+                  placeholder="SEO description for product"
+                  rows={2}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="seoKeywords">SEO Keywords</Label>
+                <Input
+                  id="seoKeywords"
+                  name="seoKeywords"
+                  value={formData.seoKeywords || ''}
+                  onChange={handleChange}
+                  placeholder="Comma-separated keywords"
+                />
+              </div>
+            </div>
+          </motion.div>
+          
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} className="gap-1">
-              <X className="h-4 w-4" /> Cancel
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
             </Button>
-            <Button type="submit" className="gap-1 bg-vsphere-primary hover:bg-vsphere-primary/90">
-              <Save className="h-4 w-4" /> Save Product
+            <Button type="submit">
+              {product ? 'Update Product' : 'Add Product'}
             </Button>
           </DialogFooter>
-        </form> */}
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,18 +12,21 @@ import {
   Trash2,
   Filter,
   ArrowUpDown,
+  Download,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import ProductModal, { Product } from "../../components/admin/ProductModal";
+import ProductModal from "../../components/admin/ProductModal";
 import { Input } from "@/components/ui/input";
 import { useProductStore } from "@/stores/product-store";
+import { exportToCSV } from "@/utils/exportUtils";
+import { motion } from "framer-motion";
 
 const ProductManagement = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [currentProduct, setCurrentProduct] = useState(null);
 
   const products = useProductStore((state) => state.products);
   const setProducts = useProductStore((state) => state.setProducts);
@@ -61,7 +65,7 @@ const ProductManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditProduct = (product: Product) => {
+  const handleEditProduct = (product) => {
     setCurrentProduct(product);
     setIsModalOpen(true);
   };
@@ -79,7 +83,7 @@ const ProductManagement = () => {
     });
   };
 
-  const handleSaveProduct = (product: Product) => {
+  const handleSaveProduct = (product) => {
     if (currentProduct) {
       // Update existing product
       setProducts(products.map((p) => (p.id === product.id ? product : p)));
@@ -87,6 +91,36 @@ const ProductManagement = () => {
       // Add new product
       setProducts([...products, product]);
     }
+  };
+
+  const handleExportProducts = (tab: string) => {
+    const dataToExport = filteredProducts(tab);
+    
+    if (dataToExport.length === 0) {
+      toast({
+        title: "No products to export",
+        description: "There are no products matching your current filters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const formattedData = dataToExport.map(product => ({
+      ID: product.id,
+      Name: product.name,
+      Category: product.category,
+      Vendor: product.vendor,
+      Price: `$${product.price.toFixed(2)}`,
+      Stock: product.stock,
+      Status: product.status
+    }));
+    
+    exportToCSV(formattedData, `products-${tab}-${new Date().toISOString().split('T')[0]}`);
+    
+    toast({
+      title: "Export Successful",
+      description: `${dataToExport.length} products have been exported to CSV.`,
+    });
   };
 
   const renderProductsTable = (tabValue: string) => {
@@ -97,7 +131,7 @@ const ProductManagement = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
+              <tr className="border-b dark:border-gray-700">
                 <th className="py-3 text-left">Product</th>
                 <th className="py-3 text-left">Category</th>
                 <th className="py-3 text-left">Vendor</th>
@@ -110,15 +144,21 @@ const ProductManagement = () => {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-4 text-center text-gray-500">
+                  <td colSpan={7} className="py-4 text-center text-gray-500 dark:text-gray-400">
                     No products found matching your criteria.
                   </td>
                 </tr>
               ) : (
-                filtered.map((product) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
+                filtered.map((product, index) => (
+                  <motion.tr 
+                    key={product.id} 
+                    className="border-b hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                  >
                     <td className="py-3 flex items-center gap-2">
-                      <div className="bg-vsphere-light/50 p-1.5 rounded">
+                      <div className="bg-vsphere-light/50 dark:bg-vsphere-dark/20 p-1.5 rounded">
                         <Package className="h-4 w-4 text-vsphere-primary" />
                       </div>
                       <span>{product.name}</span>
@@ -134,17 +174,17 @@ const ProductManagement = () => {
                         className={`
                         ${
                           product.status === "Active"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                             : ""
                         }
                         ${
                           product.status === "Low stock"
-                            ? "bg-yellow-100 text-yellow-700"
+                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                             : ""
                         }
                         ${
                           product.status === "Out of stock"
-                            ? "bg-red-100 text-red-700"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                             : ""
                         }
                       `}
@@ -170,7 +210,7 @@ const ProductManagement = () => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
@@ -181,15 +221,29 @@ const ProductManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Product Management</h1>
-        <Button
-          className="bg-vsphere-primary text-white hover:bg-vsphere-primary/90"
-          onClick={handleAddProduct}
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add New Product
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => handleExportProducts("all")}
+          >
+            <Download className="h-4 w-4" /> Export to CSV
+          </Button>
+          <Button
+            className="bg-vsphere-primary text-white hover:bg-vsphere-primary/90"
+            onClick={handleAddProduct}
+          >
+            <Plus className="h-4 w-4 mr-2" /> Add New Product
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="all">
@@ -244,6 +298,15 @@ const ProductManagement = () => {
                       : "Out of Stock"}
                     Products ({filteredProducts(tab).length})
                   </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={() => handleExportProducts(tab)}
+                  >
+                    <Download className="h-3.5 w-3.5" /> 
+                    Export
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>{renderProductsTable(tab)}</CardContent>
@@ -260,7 +323,7 @@ const ProductManagement = () => {
           onSave={handleSaveProduct}
         />
       )}
-    </div>
+    </motion.div>
   );
 };
 

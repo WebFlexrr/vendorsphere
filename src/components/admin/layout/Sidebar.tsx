@@ -9,19 +9,28 @@ import {
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import SidebarItem from './SidebarItem';
+import { motion } from 'framer-motion';
 
 interface SidebarProps {
   sidebarOpen: boolean;
 }
 
+const sidebarVariants = {
+  open: { width: '16rem', x: 0 }, 
+  closed: { width: '4rem', x: 0 }
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   const location = useLocation();
 
   return (
-    <aside 
+    <motion.aside 
+      variants={sidebarVariants}
+      animate={sidebarOpen ? "open" : "closed"}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className={cn(
-        "bg-white fixed md:static h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] shadow-md transition-all duration-300 z-10",
-        sidebarOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 md:w-16 overflow-hidden"
+        "bg-background border-r border-border fixed h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] z-10 overflow-y-auto scrollbar-thin",
+        sidebarOpen ? "w-64" : "w-16"
       )}
     >
       <div className="p-3 md:p-4">
@@ -123,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
         
         <SidebarItem icon={LogOut} label="Logout" href="/" collapsed={!sidebarOpen} />
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 
