@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
@@ -19,6 +20,21 @@ const sidebarVariants = {
   closed: { width: '4rem', x: 0 }
 };
 
+const listVariants = {
+  open: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.2
+    }
+  },
+  closed: {
+    transition: {
+      staggerChildren: 0.05,
+      staggerDirection: -1
+    }
+  }
+};
+
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   const location = useLocation();
 
@@ -33,7 +49,12 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       )}
     >
       <div className="p-3 md:p-4">
-        <nav className="space-y-1">
+        <motion.nav 
+          className="space-y-1"
+          variants={listVariants}
+          initial="closed"
+          animate={sidebarOpen ? "open" : "closed"}
+        >
           <SidebarItem 
             icon={LayoutGrid} 
             label="App Launcher" 
@@ -132,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             active={location.pathname === '/settings'} 
             collapsed={!sidebarOpen} 
           />
-        </nav>
+        </motion.nav>
 
         <Separator className="my-3 md:my-4" />
         

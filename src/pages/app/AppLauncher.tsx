@@ -15,21 +15,51 @@ interface AppTileProps {
   description: string;
   to: string;
   color: string;
+  index: number;
 }
 
-const AppTile: React.FC<AppTileProps> = ({ icon, title, description, to, color }) => {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const tileVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20
+    }
+  }
+};
+
+const AppTile: React.FC<AppTileProps> = ({ icon, title, description, to, color, index }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.03 }}
+      variants={tileVariants}
+      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.98 }}
       className="h-full"
     >
       <Link to={to} className="block h-full">
         <Card className="h-full border-2 hover:border-vsphere-primary transition-all duration-300 hover:shadow-md">
           <CardContent className="p-6 flex flex-col h-full">
-            <div className={`w-12 h-12 rounded-lg mb-4 flex items-center justify-center ${color}`}>
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.05 + 0.2, duration: 0.3 }}
+              className={`w-12 h-12 rounded-lg mb-4 flex items-center justify-center ${color}`}
+            >
               {icon}
-            </div>
+            </motion.div>
             <h3 className="text-lg font-medium mb-2">{title}</h3>
             <p className="text-sm text-muted-foreground">{description}</p>
           </CardContent>
@@ -136,12 +166,22 @@ const AppLauncher: React.FC = () => {
 
   return (
     <div className="container py-8">
-      <div className="mb-8">
+      <motion.div 
+        className="mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1 className="text-3xl font-bold mb-2">App Launcher</h1>
         <p className="text-muted-foreground">Access all VendorSphere admin applications in one place</p>
-      </div>
+      </motion.div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {apps.map((app, index) => (
           <AppTile 
             key={index}
@@ -150,9 +190,10 @@ const AppLauncher: React.FC = () => {
             description={app.description}
             to={app.to}
             color={app.color}
+            index={index}
           />
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 };

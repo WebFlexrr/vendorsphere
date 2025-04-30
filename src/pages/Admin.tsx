@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/app/AdminDashboard';
 import ProductManagement from '@/pages/app/ProductManagement';
@@ -17,26 +18,182 @@ import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
 
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.4
+};
+
 const Admin = () => {
+  const location = useLocation();
+  
   return (
     <div className="w-full">
       <AdminLayout>
-        <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/products" element={<ProductManagement />} />
-          <Route path="/orders" element={<OrderManagement />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/vendors" element={<VendorManagement />} />
-          <Route path="/marketing" element={<Marketing />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/blog" element={<BlogManagement />} />
-          <Route path="/employees" element={<EmployeeManagement />} />
-          <Route path="/inventory" element={<InventoryManagement />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/cms" element={<CMSManagement />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/app-launcher" element={<AppLauncher />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <AdminDashboard />
+              </motion.div>
+            } />
+            <Route path="/products" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <ProductManagement />
+              </motion.div>
+            } />
+            <Route path="/orders" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <OrderManagement />
+              </motion.div>
+            } />
+            <Route path="/analytics" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Analytics />
+              </motion.div>
+            } />
+            <Route path="/vendors" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <VendorManagement />
+              </motion.div>
+            } />
+            <Route path="/marketing" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Marketing />
+              </motion.div>
+            } />
+            <Route path="/settings" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Settings />
+              </motion.div>
+            } />
+            <Route path="/blog" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <BlogManagement />
+              </motion.div>
+            } />
+            <Route path="/employees" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <EmployeeManagement />
+              </motion.div>
+            } />
+            <Route path="/inventory" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <InventoryManagement />
+              </motion.div>
+            } />
+            <Route path="/users" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <UserManagement />
+              </motion.div>
+            } />
+            <Route path="/cms" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <CMSManagement />
+              </motion.div>
+            } />
+            <Route path="/notifications" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Notifications />
+              </motion.div>
+            } />
+            <Route path="/app-launcher" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <AppLauncher />
+              </motion.div>
+            } />
+          </Routes>
+        </AnimatePresence>
       </AdminLayout>
     </div>
   );
