@@ -20,14 +20,8 @@ import AppLauncher from '@/pages/app/AppLauncher';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
-};
-
-const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
-  duration: 0.4
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: "easeIn" } }
 };
 
 const Admin = () => {
@@ -44,7 +38,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <AdminDashboard />
               </motion.div>
@@ -55,7 +48,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <ProductManagement />
               </motion.div>
@@ -66,7 +58,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <OrderManagement />
               </motion.div>
@@ -77,7 +68,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <Analytics />
               </motion.div>
@@ -88,7 +78,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <VendorManagement />
               </motion.div>
@@ -99,7 +88,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <Marketing />
               </motion.div>
@@ -110,7 +98,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <Settings />
               </motion.div>
@@ -121,7 +108,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <BlogManagement />
               </motion.div>
@@ -132,7 +118,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <EmployeeManagement />
               </motion.div>
@@ -143,7 +128,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <InventoryManagement />
               </motion.div>
@@ -154,7 +138,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <UserManagement />
               </motion.div>
@@ -165,7 +148,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <CMSManagement />
               </motion.div>
@@ -176,7 +158,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <Notifications />
               </motion.div>
@@ -187,7 +168,6 @@ const Admin = () => {
                 animate="animate"
                 exit="exit"
                 variants={pageVariants}
-                transition={pageTransition}
               >
                 <AppLauncher />
               </motion.div>
