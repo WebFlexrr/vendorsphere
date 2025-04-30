@@ -18,20 +18,17 @@ import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
 
+// Animation configurations for page transitions
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
+  initial: { opacity: 0, x: -10 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: 10 }
 };
 
 const pageTransition = {
-  duration: 0.4,
-  ease: "easeOut"
-};
-
-const exitTransition = {
-  duration: 0.3,
-  ease: "easeIn"
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.3
 };
 
 const Admin = () => {
