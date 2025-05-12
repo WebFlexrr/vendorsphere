@@ -13,6 +13,8 @@ const Login = React.lazy(() => import('./pages/auth/Login'));
 const SignUp = React.lazy(() => import('./pages/auth/Signup'));
 const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword'));
 const UserProfile = React.lazy(() => import('./pages/auth/UserProfile'));
+const StoreSelection = React.lazy(() => import('./pages/auth/StoreSelection'));
+const CreateStore = React.lazy(() => import('./pages/auth/CreateStore'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 const Unauthorized = React.lazy(() => import('./pages/Unauthorized'));
 const ProtectedRoute = React.lazy(() => import('./pages/auth/ProtectedRoute'));
@@ -39,6 +41,22 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route
+                path="/store-selection"
+                element={
+                  <ProtectedRoute>
+                    <StoreSelection />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-store"
+                element={
+                  <ProtectedRoute>
+                    <CreateStore />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/admin/*"
                 element={

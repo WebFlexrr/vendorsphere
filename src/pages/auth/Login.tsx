@@ -28,9 +28,9 @@ const Login = () => {
       
       toast({
         title: "Login successful!",
-        description: "Welcome back to VendorSphere Admin",
+        description: "Welcome back to VendorSphere",
       });
-      navigate('/');
+      navigate('/store-selection');
     } catch (error) {
       toast({
         title: "Login failed",
