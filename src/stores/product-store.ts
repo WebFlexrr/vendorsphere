@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ProductImage } from "@/schemas/product";
 
 export type Product = {
   id: number;
@@ -8,10 +9,21 @@ export type Product = {
   price: number;
   stock: number;
   status: string;
+  description?: string;
+  images?: ProductImage[];
+  variants?: ProductVariant[];
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
   seoScore?: number;
+};
+
+export type ProductVariant = {
+  id: string;
+  attributes: Record<string, string>;
+  price?: number;
+  stock?: number;
+  sku?: string;
 };
 
 interface ProductState {
@@ -46,6 +58,14 @@ const initialState: ProductState = {
       price: 24.99,
       stock: 45,
       status: "Active",
+      images: [
+        {
+          id: "img1",
+          url: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+          name: "Coffee Mug",
+          isFeatured: true,
+        }
+      ]
     },
     {
       id: 2,

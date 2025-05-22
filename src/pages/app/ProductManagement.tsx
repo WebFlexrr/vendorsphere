@@ -13,6 +13,7 @@ import {
   Filter,
   ArrowUpDown,
   Download,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useProductStore } from "@/stores/product-store";
 import { exportToCSV } from "@/utils/exportUtils";
 import { motion } from "framer-motion";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const ProductManagement = () => {
   const { toast } = useToast();
@@ -112,7 +114,8 @@ const ProductManagement = () => {
       Vendor: product.vendor,
       Price: `$${product.price.toFixed(2)}`,
       Stock: product.stock,
-      Status: product.status
+      Status: product.status,
+      Images: product.images?.length || 0
     }));
     
     exportToCSV(formattedData, `products-${tab}-${new Date().toISOString().split('T')[0]}`);
@@ -121,6 +124,14 @@ const ProductManagement = () => {
       title: "Export Successful",
       description: `${dataToExport.length} products have been exported to CSV.`,
     });
+  };
+
+  const getFeaturedImage = (product) => {
+    if (!product.images || product.images.length === 0) return null;
+    
+    // Find featured image or use the first one
+    const featuredImage = product.images.find(img => img.isFeatured) || product.images[0];
+    return featuredImage.url;
   };
 
   const renderProductsTable = (tabValue: string) => {
@@ -157,11 +168,33 @@ const ProductManagement = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.02 }}
                   >
-                    <td className="py-3 flex items-center gap-2">
-                      <div className="bg-vsphere-light/50 dark:bg-vsphere-dark/20 p-1.5 rounded">
-                        <Package className="h-4 w-4 text-vsphere-primary" />
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        {getFeaturedImage(product) ? (
+                          <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 border">
+                            <AspectRatio ratio={1/1}>
+                              <img 
+                                src={getFeaturedImage(product)}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </AspectRatio>
+                          </div>
+                        ) : (
+                          <div className="bg-vsphere-light/50 dark:bg-vsphere-dark/20 p-1.5 rounded w-10 h-10 flex items-center justify-center">
+                            <Package className="h-4 w-4 text-vsphere-primary" />
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <span>{product.name}</span>
+                          {product.images?.length > 0 && (
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <ImageIcon className="h-3 w-3" />
+                              {product.images.length} image{product.images.length !== 1 && 's'}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span>{product.name}</span>
                     </td>
                     <td className="py-3">{product.category}</td>
                     <td className="py-3">{product.vendor}</td>
