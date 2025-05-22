@@ -8,6 +8,14 @@ export const productImageSchema = z.object({
   isFeatured: z.boolean().default(false),
 })
 
+export const productVariantSchema = z.object({
+  id: z.string(),
+  attributes: z.record(z.string()),
+  price: z.number().optional(),
+  stock: z.number().optional(),
+  sku: z.string().optional(),
+})
+
 export const productSchema = z.object({
   name: z.string().min(2).max(50),
   category: z.string().min(2).max(50),
@@ -16,13 +24,7 @@ export const productSchema = z.object({
   stock: z.string(),
   description: z.string().optional(),
   images: z.array(productImageSchema).optional().default([]),
-  variants: z.array(z.object({
-    id: z.string(),
-    attributes: z.record(z.string()),
-    price: z.number().optional(),
-    stock: z.number().optional(),
-    sku: z.string().optional(),
-  })).optional().default([]),
+  variants: z.array(productVariantSchema).optional().default([]),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   seoKeywords: z.string().optional(),
@@ -30,3 +32,4 @@ export const productSchema = z.object({
 })
 
 export type ProductImage = z.infer<typeof productImageSchema>
+export type ProductVariant = z.infer<typeof productVariantSchema>

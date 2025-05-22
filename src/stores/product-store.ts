@@ -1,5 +1,6 @@
+
 import { create } from "zustand";
-import { ProductImage } from "@/schemas/product";
+import { ProductImage, ProductVariant } from "@/schemas/product";
 
 export type Product = {
   id: number;
@@ -16,14 +17,6 @@ export type Product = {
   seoDescription?: string;
   seoKeywords?: string;
   seoScore?: number;
-};
-
-export type ProductVariant = {
-  id: string;
-  attributes: Record<string, string>;
-  price?: number;
-  stock?: number;
-  sku?: string;
 };
 
 interface ProductState {

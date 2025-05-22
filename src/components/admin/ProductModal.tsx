@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,14 +7,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useVendorStore } from '@/stores/vendor-store';
 import { toast } from 'sonner';
-import { productSchema, ProductImage } from '@/schemas/product';
+import { productSchema, ProductImage, ProductVariant } from '@/schemas/product';
 import { motion } from 'framer-motion';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import ImageUpload from './ImageUpload';
-import { Product, ProductVariant } from '@/stores/product-store';
+import { Product } from '@/stores/product-store';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -117,7 +118,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
       status,
       description: values.description,
       images: values.images,
-      variants: values.variants,
+      variants: values.variants as ProductVariant[],
       seoTitle: values.seoTitle,
       seoDescription: values.seoDescription,
       seoKeywords: values.seoKeywords,
