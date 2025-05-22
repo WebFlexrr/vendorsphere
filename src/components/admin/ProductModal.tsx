@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,11 +22,14 @@ interface ProductModalProps {
   onSave: (product: Product) => void;
 }
 
+// Extend the product schema to include id and status fields required by ProductFormValues
+const productFormSchema = productSchema.extend({
+  id: z.number(),
+  status: z.string(),
+});
+
 // Extract the schema type
-type ProductFormValues = z.infer<typeof productSchema> & {
-  id: number;
-  status: string;
-};
+type ProductFormValues = z.infer<typeof productFormSchema>;
 
 const initialProductState: Product = {
   id: 0,
@@ -46,7 +48,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
   
   // Initialize form with react-hook-form and zod validation
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       id: 0,
       name: '',
@@ -106,11 +108,20 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
     const status = updateStatus(stock);
     
     const finalProduct: Product = {
-      ...values,
       id: product?.id || values.id,
+      name: values.name,
+      category: values.category,
+      vendor: values.vendor,
       price,
       stock,
       status,
+      description: values.description,
+      images: values.images,
+      variants: values.variants,
+      seoTitle: values.seoTitle,
+      seoDescription: values.seoDescription,
+      seoKeywords: values.seoKeywords,
+      seoScore: values.seoScore,
     };
     
     onSave(finalProduct);
