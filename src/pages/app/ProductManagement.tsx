@@ -14,6 +14,7 @@ import {
   ArrowUpDown,
   Download,
   Image as ImageIcon,
+  Layers,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ import { useProductStore } from "@/stores/product-store";
 import { exportToCSV } from "@/utils/exportUtils";
 import { motion } from "framer-motion";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ProductManagement = () => {
   const { toast } = useToast();
@@ -148,6 +150,7 @@ const ProductManagement = () => {
                 <th className="py-3 text-left">Vendor</th>
                 <th className="py-3 text-right">Price</th>
                 <th className="py-3 text-right">Stock</th>
+                <th className="py-3 text-center">Variants</th>
                 <th className="py-3 text-center">Status</th>
                 <th className="py-3 text-right">Actions</th>
               </tr>
@@ -155,7 +158,7 @@ const ProductManagement = () => {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-4 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={8} className="py-4 text-center text-gray-500 dark:text-gray-400">
                     No products found matching your criteria.
                   </td>
                 </tr>
@@ -202,6 +205,48 @@ const ProductManagement = () => {
                       ${product.price.toFixed(2)}
                     </td>
                     <td className="py-3 text-right">{product.stock}</td>
+                    <td className="py-3 text-center">
+                      {product.variants && product.variants.length > 0 ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-center">
+                                <Badge variant="outline" className="cursor-help">
+                                  <Layers className="h-3 w-3 mr-1" />
+                                  {product.variants.length}
+                                </Badge>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="space-y-1.5">
+                                <p className="font-semibold text-sm">Product Variants:</p>
+                                <ul className="text-xs space-y-1">
+                                  {product.variants.map((variant, i) => (
+                                    <li key={variant.id} className="border-t pt-1 first:border-0 first:pt-0">
+                                      <div className="flex flex-wrap gap-1">
+                                        {Object.entries(variant.attributes).map(([key, value]) => (
+                                          <span key={key} className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">
+                                            {key}: {value}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      {variant.price && (
+                                        <span className="text-xs block mt-0.5">
+                                          Price: ${variant.price.toFixed(2)} 
+                                          {variant.stock !== undefined && ` | Stock: ${variant.stock}`}
+                                        </span>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <span className="text-gray-400 text-xs">None</span>
+                      )}
+                    </td>
                     <td className="py-3 text-center">
                       <Badge
                         className={`

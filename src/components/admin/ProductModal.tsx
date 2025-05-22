@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import ImageUpload from './ImageUpload';
+import ProductVariantManager from './ProductVariantManager';
 import { Product } from '@/stores/product-store';
 
 interface ProductModalProps {
@@ -25,8 +26,8 @@ interface ProductModalProps {
 
 // Extend the product schema to include id and status fields required by ProductFormValues
 const productFormSchema = productSchema.extend({
-  id: z.number(),
-  status: z.string(),
+  id: z.number().optional().default(0),
+  status: z.string().optional().default('Active'),
 });
 
 // Extract the schema type
@@ -42,6 +43,7 @@ const initialProductState: Product = {
   status: 'Active',
   description: '',
   images: [],
+  variants: [],
 };
 
 const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, onSave }) => {
@@ -60,6 +62,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
       status: 'Active',
       description: '',
       images: [],
+      variants: [],
     },
   });
   
@@ -71,6 +74,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
         price: String(product.price),
         stock: String(product.stock),
         images: product.images || [],
+        variants: product.variants || [],
       });
     } else {
       // Generate a new ID for new products
@@ -85,6 +89,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
         status: 'Active',
         description: '',
         images: [],
+        variants: [],
       });
     }
   }, [product, form]);
@@ -109,7 +114,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
     const status = updateStatus(stock);
     
     const finalProduct: Product = {
-      id: product?.id || values.id,
+      id: product?.id || values.id || 0,
       name: values.name,
       category: values.category,
       vendor: values.vendor,
@@ -118,7 +123,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
       status,
       description: values.description,
       images: values.images,
-      variants: values.variants as ProductVariant[],
+      variants: values.variants,
       seoTitle: values.seoTitle,
       seoDescription: values.seoDescription,
       seoKeywords: values.seoKeywords,
@@ -178,9 +183,9 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                       <SelectContent>
                         <SelectItem value="Electronics">Electronics</SelectItem>
                         <SelectItem value="Fashion">Fashion</SelectItem>
-                        <SelectItem value="Home & Garden">Home & Garden</SelectItem>
+                        <SelectItem value="Home">Home</SelectItem>
                         <SelectItem value="Sports & Outdoors">Sports & Outdoors</SelectItem>
-                        <SelectItem value="Beauty & Personal Care">Beauty & Personal Care</SelectItem>
+                        <SelectItem value="Beauty">Beauty</SelectItem>
                         <SelectItem value="Books">Books</SelectItem>
                         <SelectItem value="Toys & Games">Toys & Games</SelectItem>
                         <SelectItem value="Food & Beverages">Food & Beverages</SelectItem>
@@ -227,7 +232,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Base Price</FormLabel>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
                       <FormControl>
@@ -251,7 +256,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                 name="stock"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Stock Quantity</FormLabel>
+                    <FormLabel>Base Stock Quantity</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -294,6 +299,26 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                       value={field.value || ''}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Product Variants */}
+            <FormField
+              control={form.control}
+              name="variants"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ProductVariantManager
+                      variants={field.value || []}
+                      onChange={(variants) => field.onChange(variants)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Add product variants for different options like sizes, colors, etc.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
