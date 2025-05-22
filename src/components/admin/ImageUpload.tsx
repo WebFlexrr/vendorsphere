@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
 
   // Mock S3 upload - in a real implementation, this would use AWS SDK
-  const uploadToS3 = async (file: File): Promise<{ id: string; url: string; name: string }> => {
+  const uploadToS3 = async (file: File): Promise<ProductImage> => {
     // Create a temporary ID
     const id = Math.random().toString(36).substring(2, 15);
     
@@ -47,6 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               id,
               url,
               name: file.name,
+              isFeatured: false
             });
             
             // Clear progress
