@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,6 +16,7 @@ import UserManagement from '@/pages/app/UserManagement';
 import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
+import Tasks from '@/pages/app/Tasks';
 
 // Animation configurations for page transitions
 const pageVariants = {
@@ -48,6 +48,17 @@ const Admin = () => {
                 transition={pageTransition}
               >
                 <AdminDashboard />
+              </motion.div>
+            } />
+            <Route path="/tasks" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Tasks />
               </motion.div>
             } />
             <Route path="/products" element={

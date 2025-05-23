@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import Header from '@/components/admin/layout/Header';
-import Sidebar from '@/components/admin/layout/Sidebar';
+import ModernSidebar from '@/components/admin/layout/ModernSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -39,10 +39,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header sidebarOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="flex">
-        <Sidebar sidebarOpen={sidebarOpen} />
+    <div className="min-h-screen bg-background text-foreground flex">
+      <div className="fixed h-full z-10">
+        <ModernSidebar collapsed={!sidebarOpen} />
+      </div>
+      <div className="flex-1">
+        <Header sidebarOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <AnimatePresence mode="wait">
           <motion.main 
             key={sidebarOpen ? 'expanded' : 'collapsed'}
