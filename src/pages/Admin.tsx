@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminDashboard from '@/pages/app/AdminDashboard';
 import ProductManagement from '@/pages/app/ProductManagement';
+import ProductDetails from '@/pages/app/ProductDetails';
 import OrderManagement from '@/pages/app/OrderManagement';
 import Analytics from '@/pages/app/Analytics';
 import VendorManagement from '@/pages/app/VendorManagement';
@@ -59,6 +59,17 @@ const Admin = () => {
                 transition={pageTransition}
               >
                 <ProductManagement />
+              </motion.div>
+            } />
+            <Route path="/products/:id" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <ProductDetails />
               </motion.div>
             } />
             <Route path="/orders" element={
