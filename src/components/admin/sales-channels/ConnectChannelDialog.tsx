@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Globe, Smartphone, MessageCircle, ExternalLink, Key, Zap } from 'lucide-react';
+import { Globe, Smartphone, MessageCircle, ExternalLink, Key, Zap, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ConnectChannelDialogProps {
@@ -138,7 +137,7 @@ const ConnectChannelDialog: React.FC<ConnectChannelDialogProps> = ({
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-100 rounded">
-                          <BarChart className="h-4 w-4 text-blue-600" />
+                          <BarChart3 className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
                           <p className="font-medium">Google Analytics</p>
