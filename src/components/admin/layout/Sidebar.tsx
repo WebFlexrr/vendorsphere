@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, BarChart, Megaphone, 
-  FileText, UserCircle, LayoutTemplate, User, Bell, LayoutGrid, Zap
+  FileText, UserCircle, LayoutTemplate, User, Bell, LayoutGrid, Zap, CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -94,6 +95,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             label="Inventory" 
             href="/inventory" 
             active={location.pathname === '/inventory'} 
+            collapsed={!sidebarOpen} 
+          />
+          <SidebarItem 
+            icon={CreditCard} 
+            label="Payments" 
+            href="/payments" 
+            active={location.pathname === '/payments'} 
             collapsed={!sidebarOpen} 
           />
           <SidebarItem 

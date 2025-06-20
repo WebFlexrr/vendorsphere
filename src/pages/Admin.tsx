@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -18,6 +19,7 @@ import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
 import SalesChannels from '@/pages/app/SalesChannels';
+import Payments from '@/pages/app/Payments';
 
 // Animation configurations for page transitions
 const pageVariants = {
@@ -82,6 +84,17 @@ const Admin = () => {
                 transition={pageTransition}
               >
                 <OrderManagement />
+              </motion.div>
+            } />
+            <Route path="/payments" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Payments />
               </motion.div>
             } />
             <Route path="/analytics" element={
