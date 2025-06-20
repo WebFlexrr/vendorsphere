@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, Users, ShoppingCart, 
   Settings, LogOut, BarChart, Megaphone, 
-  FileText, UserCircle, LayoutTemplate, User, Bell, LayoutGrid
+  FileText, UserCircle, LayoutTemplate, User, Bell, LayoutGrid, Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
@@ -151,6 +150,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             label="Settings" 
             href="/settings" 
             active={location.pathname === '/settings'} 
+            collapsed={!sidebarOpen} 
+          />
+          <SidebarItem 
+            icon={Zap} 
+            label="Sales Channels" 
+            href="/sales-channels" 
+            active={location.pathname === '/sales-channels'} 
             collapsed={!sidebarOpen} 
           />
         </motion.nav>

@@ -17,6 +17,7 @@ import UserManagement from '@/pages/app/UserManagement';
 import CMSManagement from '@/pages/app/CMSManagement';
 import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
+import SalesChannels from '@/pages/app/SalesChannels';
 
 // Animation configurations for page transitions
 const pageVariants = {
@@ -202,6 +203,17 @@ const Admin = () => {
                 transition={pageTransition}
               >
                 <AppLauncher />
+              </motion.div>
+            } />
+            <Route path="/sales-channels" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <SalesChannels />
               </motion.div>
             } />
           </Routes>
