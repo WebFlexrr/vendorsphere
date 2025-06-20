@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Save, Store } from 'lucide-react';
+import { Save, Store, Key, Copy, Eye, EyeOff } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,9 +83,39 @@ const Settings = () => {
     domain: "store.vendorsphere.com",
     is_active: true
   });
+
+  const [apiKeys, setApiKeys] = useState({
+    store_id: "store_12345",
+    api_key: "vs_sk_12345...",
+    webhook_secret: "whsec_12345...",
+    public_key: "vs_pk_12345...",
+    stripe_publishable: "pk_test_12345...",
+    stripe_secret: "sk_test_12345...",
+    paypal_client_id: "",
+    google_analytics_id: "",
+    facebook_pixel_id: "",
+    mailchimp_api_key: "",
+    twilio_account_sid: "",
+    twilio_auth_token: ""
+  });
+
+  const [showSecrets, setShowSecrets] = useState({
+    api_key: false,
+    webhook_secret: false,
+    stripe_secret: false,
+    twilio_auth_token: false,
+    mailchimp_api_key: false
+  });
   
   const handleStoreChange = (field: string, value: string | boolean) => {
     setStoreData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleApiKeyChange = (field: string, value: string) => {
+    setApiKeys(prev => ({
       ...prev,
       [field]: value
     }));
@@ -99,6 +128,29 @@ const Settings = () => {
       country: value,
       country_code: country?.code || prev.country_code
     }));
+  };
+
+  const toggleSecretVisibility = (field: string) => {
+    setShowSecrets(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: `${label} copied to clipboard.`
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy to clipboard.",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleSave = () => {
@@ -129,12 +181,13 @@ const Settings = () => {
       <Tabs defaultValue="store" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="store">Store</TabsTrigger>
+          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="social">Social Media</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
         </TabsList>
         
-        {/* New Store Tab */}
+        {/* Store Tab */}
         <TabsContent value="store" className="space-y-4">
           <motion.div
             variants={sectionVariants}
@@ -335,6 +388,255 @@ const Settings = () => {
                 <Button onClick={handleSave}>
                   <Save className="mr-2 h-4 w-4" />
                   Save Store Settings
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </TabsContent>
+        
+        {/* API Keys Tab */}
+        <TabsContent value="api-keys" className="space-y-4">
+          <motion.div
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  API Keys & Credentials
+                </CardTitle>
+                <CardDescription>
+                  Manage your API keys, store credentials, and third-party integrations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Store Credentials */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Store Credentials</h3>
+                  
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="store-id">Store ID</Label>
+                    <div className="flex">
+                      <Input 
+                        id="store-id" 
+                        value={apiKeys.store_id}
+                        readOnly
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => copyToClipboard(apiKeys.store_id, "Store ID")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your unique store identifier. This is read-only.
+                    </p>
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="public-key">Public Key</Label>
+                    <div className="flex">
+                      <Input 
+                        id="public-key" 
+                        value={apiKeys.public_key}
+                        onChange={(e) => handleApiKeyChange('public_key', e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => copyToClipboard(apiKeys.public_key, "Public Key")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your public API key for client-side integrations.
+                    </p>
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="api-key">Secret API Key</Label>
+                    <div className="flex">
+                      <Input 
+                        id="api-key" 
+                        type={showSecrets.api_key ? "text" : "password"}
+                        value={apiKeys.api_key}
+                        onChange={(e) => handleApiKeyChange('api_key', e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => toggleSecretVisibility('api_key')}
+                      >
+                        {showSecrets.api_key ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => copyToClipboard(apiKeys.api_key, "API Key")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Keep this secret! Used for server-side API calls.
+                    </p>
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="webhook-secret">Webhook Secret</Label>
+                    <div className="flex">
+                      <Input 
+                        id="webhook-secret" 
+                        type={showSecrets.webhook_secret ? "text" : "password"}
+                        value={apiKeys.webhook_secret}
+                        onChange={(e) => handleApiKeyChange('webhook_secret', e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => toggleSecretVisibility('webhook_secret')}
+                      >
+                        {showSecrets.webhook_secret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => copyToClipboard(apiKeys.webhook_secret, "Webhook Secret")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Used to verify webhook authenticity.
+                    </p>
+                  </motion.div>
+                </div>
+
+                {/* Payment Gateways */}
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-lg font-medium">Payment Gateways</h3>
+                  
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="stripe-publishable">Stripe Publishable Key</Label>
+                    <Input 
+                      id="stripe-publishable" 
+                      value={apiKeys.stripe_publishable}
+                      onChange={(e) => handleApiKeyChange('stripe_publishable', e.target.value)}
+                      placeholder="pk_test_..."
+                    />
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="stripe-secret">Stripe Secret Key</Label>
+                    <div className="flex">
+                      <Input 
+                        id="stripe-secret" 
+                        type={showSecrets.stripe_secret ? "text" : "password"}
+                        value={apiKeys.stripe_secret}
+                        onChange={(e) => handleApiKeyChange('stripe_secret', e.target.value)}
+                        placeholder="sk_test_..."
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => toggleSecretVisibility('stripe_secret')}
+                      >
+                        {showSecrets.stripe_secret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="paypal-client-id">PayPal Client ID</Label>
+                    <Input 
+                      id="paypal-client-id" 
+                      value={apiKeys.paypal_client_id}
+                      onChange={(e) => handleApiKeyChange('paypal_client_id', e.target.value)}
+                      placeholder="AX..."
+                    />
+                  </motion.div>
+                </div>
+
+                {/* Third-party Services */}
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-lg font-medium">Third-party Services</h3>
+                  
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="mailchimp-api">Mailchimp API Key</Label>
+                    <div className="flex">
+                      <Input 
+                        id="mailchimp-api" 
+                        type={showSecrets.mailchimp_api_key ? "text" : "password"}
+                        value={apiKeys.mailchimp_api_key}
+                        onChange={(e) => handleApiKeyChange('mailchimp_api_key', e.target.value)}
+                        placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-us1"
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => toggleSecretVisibility('mailchimp_api_key')}
+                      >
+                        {showSecrets.mailchimp_api_key ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="twilio-sid">Twilio Account SID</Label>
+                    <Input 
+                      id="twilio-sid" 
+                      value={apiKeys.twilio_account_sid}
+                      onChange={(e) => handleApiKeyChange('twilio_account_sid', e.target.value)}
+                      placeholder="AC..."
+                    />
+                  </motion.div>
+
+                  <motion.div variants={itemVariants} className="space-y-2">
+                    <Label htmlFor="twilio-token">Twilio Auth Token</Label>
+                    <div className="flex">
+                      <Input 
+                        id="twilio-token" 
+                        type={showSecrets.twilio_auth_token ? "text" : "password"}
+                        value={apiKeys.twilio_auth_token}
+                        onChange={(e) => handleApiKeyChange('twilio_auth_token', e.target.value)}
+                        placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => toggleSecretVisibility('twilio_auth_token')}
+                      >
+                        {showSecrets.twilio_auth_token ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSave}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save API Keys
                 </Button>
               </CardFooter>
             </Card>
