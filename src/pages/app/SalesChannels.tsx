@@ -46,6 +46,7 @@ const SalesChannels = () => {
   const [settingsChannel, setSettingsChannel] = useState<string | null>(null);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [channelToConnect, setChannelToConnect] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const [channels, setChannels] = useState<SalesChannel[]>([
     {
@@ -151,6 +152,11 @@ const SalesChannels = () => {
     setChannelToConnect(null);
   };
 
+  const handleAnalyticsClick = (channelId: string) => {
+    setSelectedChannel(channelId);
+    setActiveTab('analytics');
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'connected': return 'bg-green-100 text-green-700';
@@ -186,7 +192,7 @@ const SalesChannels = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
@@ -251,7 +257,7 @@ const SalesChannels = () => {
                               variant="outline" 
                               size="sm" 
                               className="flex-1"
-                              onClick={() => setSelectedChannel(channel.id)}
+                              onClick={() => handleAnalyticsClick(channel.id)}
                             >
                               <BarChart3 className="h-4 w-4 mr-2" />
                               Analytics
@@ -299,7 +305,10 @@ const SalesChannels = () => {
           {selectedChannel ? (
             <ChannelDashboard 
               channel={channels.find(c => c.id === selectedChannel)!}
-              onBack={() => setSelectedChannel(null)}
+              onBack={() => {
+                setSelectedChannel(null);
+                setActiveTab('overview');
+              }}
             />
           ) : (
             <div className="text-center py-12">
