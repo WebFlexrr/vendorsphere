@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,12 +7,14 @@ import { Globe, Smartphone, MessageCircle, Plus, Settings, BarChart3, Users, Sho
 import { motion } from 'framer-motion';
 import ChannelDashboard from '@/components/admin/sales-channels/ChannelDashboard';
 import ConnectChannelDialog from '@/components/admin/sales-channels/ConnectChannelDialog';
+import DashboardPanel from '@/components/admin/sales-channels/DashboardPanel';
+import SettingsPanel from '@/components/admin/sales-channels/SettingsPanel';
 
 interface SalesChannel {
   id: string;
   name: string;
   type: 'website' | 'mobile' | 'whatsapp';
-  status: 'connected' | 'disconnected' | 'pending';
+  status: 'connected' | 'disconnected' | 'pending' | 'error';
   icon: React.ComponentType<any>;
   description: string;
   metrics: {
@@ -22,10 +23,27 @@ interface SalesChannel {
     customers: number;
     conversionRate: number;
   };
+  seoMetrics: {
+    visitors: number;
+    orders: number;
+    profit: number;
+    conversionRate: number;
+    bounceRate: number;
+    avgSessionDuration: string;
+    organicTraffic: number;
+    paidTraffic: number;
+    socialTraffic: number;
+    directTraffic: number;
+  };
+  issues: Array<{
+    type: 'warning' | 'error';
+    message: string;
+  }>;
 }
 
 const SalesChannels = () => {
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [settingsChannel, setSettingsChannel] = useState<string | null>(null);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [channelToConnect, setChannelToConnect] = useState<string | null>(null);
 
@@ -42,7 +60,23 @@ const SalesChannels = () => {
         revenue: 15420,
         customers: 89,
         conversionRate: 3.2
-      }
+      },
+      seoMetrics: {
+        visitors: 5420,
+        orders: 142,
+        profit: 8750,
+        conversionRate: 2.6,
+        bounceRate: 45,
+        avgSessionDuration: '2m 34s',
+        organicTraffic: 65,
+        paidTraffic: 20,
+        socialTraffic: 10,
+        directTraffic: 5
+      },
+      issues: [
+        { type: 'warning', message: 'Page load time is above 3 seconds' },
+        { type: 'warning', message: 'Missing meta descriptions on 12 pages' }
+      ]
     },
     {
       id: 'mobile',
@@ -56,21 +90,49 @@ const SalesChannels = () => {
         revenue: 0,
         customers: 0,
         conversionRate: 0
-      }
+      },
+      seoMetrics: {
+        visitors: 0,
+        orders: 0,
+        profit: 0,
+        conversionRate: 0,
+        bounceRate: 0,
+        avgSessionDuration: '0s',
+        organicTraffic: 0,
+        paidTraffic: 0,
+        socialTraffic: 0,
+        directTraffic: 0
+      },
+      issues: []
     },
     {
       id: 'whatsapp',
       name: 'WhatsApp Business',
       type: 'whatsapp',
-      status: 'disconnected',
+      status: 'connected',
       icon: MessageCircle,
       description: 'WhatsApp Business API integration',
       metrics: {
-        orders: 0,
-        revenue: 0,
-        customers: 0,
-        conversionRate: 0
-      }
+        orders: 23,
+        revenue: 2340,
+        customers: 18,
+        conversionRate: 12.5
+      },
+      seoMetrics: {
+        visitors: 890,
+        orders: 23,
+        profit: 1450,
+        conversionRate: 2.6,
+        bounceRate: 25,
+        avgSessionDuration: '4m 12s',
+        organicTraffic: 80,
+        paidTraffic: 5,
+        socialTraffic: 15,
+        directTraffic: 0
+      },
+      issues: [
+        { type: 'error', message: 'Message delivery rate below 85%' }
+      ]
     }
   ]);
 
@@ -93,9 +155,20 @@ const SalesChannels = () => {
     switch (status) {
       case 'connected': return 'bg-green-100 text-green-700';
       case 'pending': return 'bg-yellow-100 text-yellow-700';
+      case 'error': return 'bg-red-100 text-red-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
+
+  // Show settings panel if a channel is selected for settings
+  if (settingsChannel) {
+    return (
+      <SettingsPanel 
+        channelId={settingsChannel}
+        onBack={() => setSettingsChannel(null)}
+      />
+    );
+  }
 
   return (
     <motion.div 
@@ -108,7 +181,7 @@ const SalesChannels = () => {
         <div>
           <h1 className="text-2xl font-bold">Sales Channels</h1>
           <p className="text-muted-foreground">
-            Connect and manage your sales channels
+            Connect and manage your sales channels with SEO analytics
           </p>
         </div>
       </div>
@@ -117,6 +190,7 @@ const SalesChannels = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="analytics">Channel Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -155,16 +229,16 @@ const SalesChannels = () => {
                         <>
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="space-y-1">
+                              <p className="text-muted-foreground">Visitors</p>
+                              <p className="font-semibold">{channel.seoMetrics.visitors.toLocaleString()}</p>
+                            </div>
+                            <div className="space-y-1">
                               <p className="text-muted-foreground">Orders</p>
                               <p className="font-semibold">{channel.metrics.orders}</p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-muted-foreground">Revenue</p>
                               <p className="font-semibold">${channel.metrics.revenue.toLocaleString()}</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-muted-foreground">Customers</p>
-                              <p className="font-semibold">{channel.metrics.customers}</p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-muted-foreground">Conv. Rate</p>
@@ -180,9 +254,13 @@ const SalesChannels = () => {
                               onClick={() => setSelectedChannel(channel.id)}
                             >
                               <BarChart3 className="h-4 w-4 mr-2" />
-                              Dashboard
+                              Analytics
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setSettingsChannel(channel.id)}
+                            >
                               <Settings className="h-4 w-4" />
                             </Button>
                           </div>
@@ -211,6 +289,13 @@ const SalesChannels = () => {
         </TabsContent>
 
         <TabsContent value="dashboard">
+          <DashboardPanel 
+            channels={channels}
+            onOpenSettings={setSettingsChannel}
+          />
+        </TabsContent>
+
+        <TabsContent value="analytics">
           {selectedChannel ? (
             <ChannelDashboard 
               channel={channels.find(c => c.id === selectedChannel)!}
@@ -221,7 +306,7 @@ const SalesChannels = () => {
               <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Select a Channel</h3>
               <p className="text-muted-foreground">
-                Choose a connected sales channel to view its dashboard
+                Choose a connected sales channel to view its detailed analytics
               </p>
             </div>
           )}
