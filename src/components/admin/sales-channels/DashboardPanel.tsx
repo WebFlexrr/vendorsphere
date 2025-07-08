@@ -11,7 +11,7 @@ interface ChannelMetrics {
   id: string;
   name: string;
   type: 'website' | 'mobile' | 'whatsapp';
-  status: 'connected' | 'disconnected' | 'error';
+  status: 'connected' | 'disconnected' | 'error' | 'pending';
   icon: React.ComponentType<any>;
   seoMetrics: {
     visitors: number;
@@ -149,6 +149,8 @@ const DashboardPanel: React.FC<DashboardPanelProps> = ({ channels, onOpenSetting
                               ? 'bg-green-100 text-green-700' 
                               : channel.status === 'error'
                               ? 'bg-red-100 text-red-700'
+                              : channel.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-700'
                               : 'bg-gray-100 text-gray-700'
                           }
                         >
