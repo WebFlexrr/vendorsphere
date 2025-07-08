@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, Store, Key, Copy, Eye, EyeOff } from 'lucide-react';
+import { Save, Store, Key, Copy, Eye, EyeOff, CreditCard, Wallet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -99,12 +99,34 @@ const Settings = () => {
     twilio_auth_token: ""
   });
 
+  const [paymentGateways, setPaymentGateways] = useState({
+    stripe_enabled: true,
+    stripe_test_mode: true,
+    paypal_enabled: true,
+    paypal_test_mode: false,
+    square_enabled: false,
+    square_test_mode: true,
+    razorpay_enabled: false,
+    razorpay_test_mode: true,
+    // Keys
+    stripe_webhook_secret: '',
+    paypal_webhook_id: '',
+    square_application_id: '',
+    square_access_token: '',
+    razorpay_key_id: '',
+    razorpay_key_secret: '',
+  });
+
   const [showSecrets, setShowSecrets] = useState({
     api_key: false,
     webhook_secret: false,
     stripe_secret: false,
     twilio_auth_token: false,
-    mailchimp_api_key: false
+    mailchimp_api_key: false,
+    stripe_webhook_secret: false,
+    paypal_webhook_id: false,
+    square_access_token: false,
+    razorpay_key_secret: false,
   });
   
   const handleStoreChange = (field: string, value: string | boolean) => {
@@ -152,7 +174,14 @@ const Settings = () => {
       });
     }
   };
-  
+
+  const handlePaymentGatewayChange = (field: string, value: string | boolean) => {
+    setPaymentGateways(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleSave = () => {
     toast({
       title: "Settings saved",
@@ -182,6 +211,7 @@ const Settings = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="store">Store</TabsTrigger>
           <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+          <TabsTrigger value="payment-gateways">Payment Gateways</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="social">Social Media</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
@@ -641,6 +671,302 @@ const Settings = () => {
               </CardFooter>
             </Card>
           </motion.div>
+        </TabsContent>
+
+        {/* Payment Gateways Tab */}
+        <TabsContent value="payment-gateways" className="space-y-4">
+          <motion.div
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Stripe */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Stripe
+                </CardTitle>
+                <CardDescription>
+                  Accept credit card payments with Stripe
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Enable Stripe</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Accept payments via Stripe
+                    </p>
+                  </div>
+                  <Switch
+                    checked={paymentGateways.stripe_enabled}
+                    onCheckedChange={(checked) => handlePaymentGatewayChange('stripe_enabled', checked)}
+                  />
+                </div>
+
+                {paymentGateways.stripe_enabled && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-base">Test Mode</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Use Stripe in test mode
+                        </p>
+                      </div>
+                      <Switch
+                        checked={paymentGateways.stripe_test_mode}
+                        onCheckedChange={(checked) => handlePaymentGatewayChange('stripe_test_mode', checked)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="stripe-webhook">Stripe Webhook Secret</Label>
+                      <div className="flex">
+                        <Input 
+                          id="stripe-webhook" 
+                          type={showSecrets.stripe_webhook_secret ? "text" : "password"}
+                          value={paymentGateways.stripe_webhook_secret}
+                          onChange={(e) => handlePaymentGatewayChange('stripe_webhook_secret', e.target.value)}
+                          placeholder="whsec_..."
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => toggleSecretVisibility('stripe_webhook_secret')}
+                        >
+                          {showSecrets.stripe_webhook_secret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* PayPal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
+                  PayPal
+                </CardTitle>
+                <CardDescription>
+                  Accept payments through PayPal
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Enable PayPal</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Accept payments via PayPal
+                    </p>
+                  </div>
+                  <Switch
+                    checked={paymentGateways.paypal_enabled}
+                    onCheckedChange={(checked) => handlePaymentGatewayChange('paypal_enabled', checked)}
+                  />
+                </div>
+
+                {paymentGateways.paypal_enabled && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-base">Test Mode</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Use PayPal sandbox environment
+                        </p>
+                      </div>
+                      <Switch
+                        checked={paymentGateways.paypal_test_mode}
+                        onCheckedChange={(checked) => handlePaymentGatewayChange('paypal_test_mode', checked)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="paypal-webhook">PayPal Webhook ID</Label>
+                      <div className="flex">
+                        <Input 
+                          id="paypal-webhook" 
+                          type={showSecrets.paypal_webhook_id ? "text" : "password"}
+                          value={paymentGateways.paypal_webhook_id}
+                          onChange={(e) => handlePaymentGatewayChange('paypal_webhook_id', e.target.value)}
+                          placeholder="Enter PayPal Webhook ID"
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => toggleSecretVisibility('paypal_webhook_id')}
+                        >
+                          {showSecrets.paypal_webhook_id ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Square */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Square</CardTitle>
+                <CardDescription>
+                  Accept in-person and online payments with Square
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Enable Square</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Accept payments via Square
+                    </p>
+                  </div>
+                  <Switch
+                    checked={paymentGateways.square_enabled}
+                    onCheckedChange={(checked) => handlePaymentGatewayChange('square_enabled', checked)}
+                  />
+                </div>
+
+                {paymentGateways.square_enabled && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-base">Test Mode</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Use Square sandbox environment
+                        </p>
+                      </div>
+                      <Switch
+                        checked={paymentGateways.square_test_mode}
+                        onCheckedChange={(checked) => handlePaymentGatewayChange('square_test_mode', checked)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="square-app-id">Application ID</Label>
+                        <Input 
+                          id="square-app-id" 
+                          value={paymentGateways.square_application_id}
+                          onChange={(e) => handlePaymentGatewayChange('square_application_id', e.target.value)}
+                          placeholder="sq0idp-..."
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="square-token">Access Token</Label>
+                        <div className="flex">
+                          <Input 
+                            id="square-token" 
+                            type={showSecrets.square_access_token ? "text" : "password"}
+                            value={paymentGateways.square_access_token}
+                            onChange={(e) => handlePaymentGatewayChange('square_access_token', e.target.value)}
+                            placeholder="EAAAl..."
+                            className="flex-1"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => toggleSecretVisibility('square_access_token')}
+                          >
+                            {showSecrets.square_access_token ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Razorpay */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Razorpay</CardTitle>
+                <CardDescription>
+                  Accept payments in India with Razorpay
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Enable Razorpay</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Accept payments via Razorpay
+                    </p>
+                  </div>
+                  <Switch
+                    checked={paymentGateways.razorpay_enabled}
+                    onCheckedChange={(checked) => handlePaymentGatewayChange('razorpay_enabled', checked)}
+                  />
+                </div>
+
+                {paymentGateways.razorpay_enabled && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-base">Test Mode</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Use Razorpay test environment
+                        </p>
+                      </div>
+                      <Switch
+                        checked={paymentGateways.razorpay_test_mode}
+                        onCheckedChange={(checked) => handlePaymentGatewayChange('razorpay_test_mode', checked)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="razorpay-key-id">Key ID</Label>
+                        <Input 
+                          id="razorpay-key-id" 
+                          value={paymentGateways.razorpay_key_id}
+                          onChange={(e) => handlePaymentGatewayChange('razorpay_key_id', e.target.value)}
+                          placeholder="rzp_test_..."
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="razorpay-secret">Key Secret</Label>
+                        <div className="flex">
+                          <Input 
+                            id="razorpay-secret" 
+                            type={showSecrets.razorpay_key_secret ? "text" : "password"}
+                            value={paymentGateways.razorpay_key_secret}
+                            onChange={(e) => handlePaymentGatewayChange('razorpay_key_secret', e.target.value)}
+                            placeholder="Enter key secret"
+                            className="flex-1"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => toggleSecretVisibility('razorpay_key_secret')}
+                          >
+                            {showSecrets.razorpay_key_secret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Payment Settings
+            </Button>
+          </div>
         </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4">
