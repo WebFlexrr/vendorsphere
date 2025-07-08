@@ -20,6 +20,7 @@ import Notifications from '@/components/admin/Notifications';
 import AppLauncher from '@/pages/app/AppLauncher';
 import SalesChannels from '@/pages/app/SalesChannels';
 import Payments from '@/pages/app/Payments';
+import Integrations from '@/pages/app/Integrations';
 
 // Animation configurations for page transitions
 const pageVariants = {
@@ -194,6 +195,17 @@ const Admin = () => {
                 transition={pageTransition}
               >
                 <CMSManagement />
+              </motion.div>
+            } />
+            <Route path="/integrations" element={
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Integrations />
               </motion.div>
             } />
             <Route path="/notifications" element={

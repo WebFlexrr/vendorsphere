@@ -147,6 +147,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
             collapsed={!sidebarOpen} 
           />
           <SidebarItem 
+            icon={Zap} 
+            label="Integrations" 
+            href="/integrations" 
+            active={location.pathname === '/integrations'} 
+            collapsed={!sidebarOpen} 
+          />
+          <SidebarItem 
             icon={Bell} 
             label="Notifications" 
             href="/notifications" 
